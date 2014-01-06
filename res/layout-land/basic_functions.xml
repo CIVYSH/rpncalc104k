@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="0dp"
+    android:padding="0dp" >      
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:id="@+id/butAddition"
+            android:src="@drawable/op_addition"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />          
+        <ImageButton
+            android:id="@+id/butMultiplication"
+            android:src="@drawable/op_multiplication"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butNegative"
+            android:src="@drawable/op_negative"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />  
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:id="@+id/butSubtraction"
+            android:src="@drawable/op_subtraction"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butDivision"
+            android:src="@drawable/op_division"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />   
+        <ImageButton
+            android:id="@+id/butInversion"
+            android:src="@drawable/op_inversion"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />  
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:id="@+id/butSquare"
+            android:src="@drawable/op_square"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butExponentiation"
+            android:src="@drawable/op_exponentiation"
+            android:layout_height="fill_parent"            android:layout_width="0dp"            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butSquareRoot"
+            android:src="@drawable/op_squareroot"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.Operation" /> 
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.ChangePage" /> 
+        <ImageButton
+            android:id="@+id/butFunctions0to1"
+            android:src="@drawable/ic_action_next_item"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.ChangePage" />   
+    </LinearLayout>
+</LinearLayout>
