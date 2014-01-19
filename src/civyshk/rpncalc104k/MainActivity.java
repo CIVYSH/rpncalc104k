@@ -1,4 +1,4 @@
-package com.example.rpncalc;
+package civyshk.rpncalc104k;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -6,17 +6,35 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
 import android.os.Bundle;
+import android.app.Activity;
+import android.content.res.Resources;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewAnimator;
+import civyshk.rpncalc104k.R;
+
+/*
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -25,26 +43,11 @@ import android.text.style.SubscriptSpan;
 import android.text.style.SuperscriptSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.View.OnClickListener;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.HorizontalScrollView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ViewAnimator;
 import android.widget.ViewSwitcher;
+import android.util.Log;
+import android.view.WindowManager;
+import android.view.View.MeasureSpec;
+*/
 
 public class MainActivity extends Activity{
 	
@@ -229,12 +232,10 @@ public class MainActivity extends Activity{
 		}
 		@Override
 		public void undo(){
-			Log.d("UndoEnter", "size " + listDigits.size());
 			listNumbers.removeLast();
 			removeLastNumber();
 			listDigits = new ArrayList <Integer>(savedDigits);
 			posDecimal = savedPos;
-			Log.d("UndoEnter", "size " + listDigits.size());
 			tvDigits.setText(textDigits);
 			setWritingDigits(true);
 		}
@@ -750,27 +751,10 @@ public class MainActivity extends Activity{
 //		toast("onCreateOptionsMenu");
 		return b;
 	}
-	/*@Override
-	public View onCreatePanelView(int featureId){
-		View view = super.onCreatePanelView(featureId);
-		toast("onCreatePanelView");
-		return view;
-	}
-	@Override
-	public boolean onCreatePanelMenu(int featureId, Menu menu){
-		boolean b = super.onCreatePanelMenu(featureId, menu);
-		toast("onCreatePanelMenu");
-		return b;
-	}
-	@Override
-	public void onConfigurationChanged(Configuration newConfig){
-		super.onConfigurationChanged(newConfig);
-		toast("onConfiguration");
-	}*/
 	ArrayList <String> buildStringArrayListNumbers(List <BigDecimal> numbers){
 		ArrayList <String> stringNumbers = new ArrayList <String>();
 		for(BigDecimal num : numbers){
-			stringNumbers.add(removeZeros(num.toString(), false));
+			stringNumbers.add(removeZeros(num.toString(), false, "."));
 		}
 		return stringNumbers;
 	}
@@ -1158,13 +1142,14 @@ public class MainActivity extends Activity{
 			}
 		}
 	}
-	String removeZeros(String string, boolean keepTrailingZeros){
+	String removeZeros(String string, boolean keepTrailingZeros, String decimalSeparator){
+		char decimalSeparatorChar = decimalSeparator.charAt(0);
 		boolean keepRemoving = true;
 		boolean scientific = false;
 		StringBuilder str = new StringBuilder(string);
 		while(keepRemoving && str.length() >= 2){// delete left zeros
 			if(str.charAt(0) == '0'
-					&& str.charAt(1) != getResources().getString(R.string.decimalSeparator).charAt(0)
+					&& str.charAt(1) != decimalSeparatorChar
 					&& str.charAt(1) != 'E'){
 				str.deleteCharAt(0);
 			}else{
@@ -1186,7 +1171,7 @@ public class MainActivity extends Activity{
 		int pos = 0;
 		int posDec = str.length();
 		while(pos < str.length()){
-			if(str.charAt(pos) == getResources().getString(R.string.decimalSeparator).charAt(0)){
+			if(str.charAt(pos) == decimalSeparatorChar){
 				posDec = pos;
 			}
 			pos++;
@@ -1195,7 +1180,7 @@ public class MainActivity extends Activity{
 		while(keepRemoving && posDec < pos){
 			if(str.charAt(pos) == '0'){
 				str.deleteCharAt(pos);
-				if(str.charAt(pos - 1) == getResources().getString(R.string.decimalSeparator).charAt(0)){
+				if(str.charAt(pos - 1) == decimalSeparatorChar){
 					str.deleteCharAt(pos - 1);
 					keepRemoving = false;
 				}
@@ -1206,7 +1191,7 @@ public class MainActivity extends Activity{
 		}
 		return str.toString();
 	}
-	String buildString(List <Integer> listDigits, int pos, boolean keepTrailingZeros){
+	String buildString(List <Integer> listDigits, int pos, boolean keepTrailingZeros, String decimalSeparator){
 		int numberOfDigits = listDigits.size();
 		StringBuilder numberString = new StringBuilder(numberOfDigits + 2);
 		for(int i = 0; i < numberOfDigits; ++i){
@@ -1214,19 +1199,19 @@ public class MainActivity extends Activity{
 				if(pos == 0){
 					numberString.append(0);
 				}
-				numberString.append(getResources().getString(R.string.decimalSeparator));
+				numberString.append(decimalSeparator);
 			}
 			numberString.append(listDigits.get(i));
 		}
 		if(pos == numberOfDigits){
-			numberString.append(getResources().getString(R.string.decimalSeparator));
+			numberString.append(decimalSeparator);
 		}
-		return removeZeros(numberString.toString(), keepTrailingZeros);
+		return removeZeros(numberString.toString(), keepTrailingZeros, decimalSeparator);
 	}
 	BigDecimal buildNumber(List <Integer> listDigits, int pos){
 		int numberOfDigits = listDigits.size();
 		BigDecimal number;
-		if(numberOfDigits == 0){// && pos != -1
+		if(numberOfDigits == 0){
 			number = new BigDecimal("0.0");
 		}else{
 			StringBuilder numberString = new StringBuilder(numberOfDigits + 2);
@@ -1235,7 +1220,7 @@ public class MainActivity extends Activity{
 					if(pos == 0){
 						numberString.append(0);
 					}
-					numberString.append(getResources().getString(R.string.decimalSeparator));
+					numberString.append(".");
 				}
 				numberString.append(listDigits.get(i));
 			}
@@ -1257,21 +1242,32 @@ public class MainActivity extends Activity{
 		tv.setLayoutParams(params);
 		tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
 		tv.setGravity(Gravity.CENTER_VERTICAL);
-		tv.setText(removeZeros(number.toString(), false));
+		tv.setText(localizeDecimalSeparator(removeZeros(number.toString(), false, ".")));
 		layoutNumbers.addView(tv);
 		scrollToRight(scrollViewNumbers);
 		return;
 	}
+	String localizeDecimalSeparator(String str){
+		StringBuilder localized = new StringBuilder(str);
+		char decimalSeparator = getResources().getString(R.string.decimalSeparator).charAt(0);
+		for(int i=0; i<str.length(); i++){
+			if(str.charAt(i) == '.'){
+				localized.setCharAt(i, decimalSeparator);
+				break;
+			}
+		}
+		return localized.toString();
+	}
 	void showDigits(List <Integer> digits, int decimal){
-		tvDigits.setText(buildString(digits, decimal, false));
+		tvDigits.setText(buildString(digits, decimal, false, getResources().getString(R.string.decimalSeparator)));
 		showOnly(scrollViewDigits);
 	}
 	void showDigitsWithZeros(List <Integer> digits, int decimal){
-		tvDigits.setText(buildString(digits, decimal, true));
+		tvDigits.setText(buildString(digits, decimal, true, getResources().getString(R.string.decimalSeparator)));
 		showOnly(scrollViewDigits);
 	}
 	void showDigits(BigDecimal number){
-		tvDigits.setText(removeZeros(number.toString(), false));
+		tvDigits.setText(localizeDecimalSeparator(removeZeros(number.toString(), false, ".")));
 		showOnly(scrollViewDigits);
 	}
 	void removeLastNumber(){

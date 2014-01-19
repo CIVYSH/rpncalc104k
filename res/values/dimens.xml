@@ -3,16 +3,16 @@
     <dimen name="activity_horizontal_margin">0dp</dimen>
     <dimen name="activity_vertical_margin">0dp</dimen>
     
-    <dimen name="layout_top_height">70sp</dimen>
+    <dimen name="layout_top_height">72sp</dimen>
     
     <dimen name="layout_numbers_height">24sp</dimen>
-    <dimen name="number_view_horiz_margin">9sp</dimen>
+    <dimen name="number_view_horiz_margin">7sp</dimen>
     <dimen name="list_numbers_text_size">20sp</dimen>
     
      <dimen name="angle_view_width">22sp</dimen>
     <dimen name="angle_text_size">12sp</dimen>
     
-    <dimen name="layout_digits_height">44sp</dimen>
+    <dimen name="layout_digits_height">46sp</dimen>
     <dimen name="list_digits_text_size">40sp</dimen>
     
     <dimen name="error_text_size">16sp</dimen>
