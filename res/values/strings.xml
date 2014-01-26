@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RPN Calculator 104K</string>
+    <string name="clear">Clear</string>
+    <string name="decimalSeparator">.</string>
+    <string name="notEnoughArguments">Not enough operands</string>
+    <string name="error">Error</string>
+    <string name="divisionByZero">Division by zero</string>
+    <string name="negativeSquareRoot">Negative square root</string>
+    <string name="notATriangle">Not a triangle</string>
+    <string name="sideCantBeNegative">Side can\'t be negative</string>
+    <string name="arcsineOutOfRange">Arcsine out of range [-1, 1]</string>
+    <string name="arccosineOutOfRange">Arccosine out of range [-1, 1]</string>
+    <string name="operationNotImplemented">Operation not implemented</string>
+    <string name="function...">Function…</string>
+    <string name="surfaceOfTriangle">Surface of triangle (3 sides)</string>
+    <string name="hypotenusePythagoras">Hypotenuse in right triangle (2 sides)</string>
+    <string name="legPythagoras">Leg in right triangle (2 sides)</string>
+    <string name="logOutOfRange">Log out of range (0, +inf)</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="switchAngleMode">Switch deg/rad</string>
+</resources>
