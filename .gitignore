@@ -1,3 +1,6 @@
+#website has its own branch gh-pages
+pages/
+
 # built application files
 *.apk
 *.ap_
