@@ -1,18 +1,155 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <head>
-  <title>RPNCalc104k hosted on GitHub</title>
+  <title>RPNCalc104k for Android by CIVYSH</title>
   <style type="text/css">
-  body {}
+body {
+		background-color:#99c
+}
+table.wrapper {
+	background:#99c;
+	width: 1000px;
+	margin: auto;
+	border-collapse: collapse;
+}
+table.wrapper td {
+	text-align: center;
+	border: solid 1px gray;
+	padding: 10px;
+	text-align: left
+}
+table.wrapper td.header {
+	background:#ddd;
+	text-align: center;
+}
+table.wrapper td.nav {
+	background:#c89;
+	text-align: left;
+}
+table.wrapper td.main {
+  background:#9c9;
+	width: 75%;
+	text-align: justify;
+}
+table.wrapper td.sidebar {
+		background:#c9c;
+		vertical-align: top;
+}
+table.wrapper td.footer {
+    background:#cc9;
+    text-align: center;
+}
+#nav ul {
+    margin:0;
+    padding:0;
+    list-style:none;
+    clear: both;
+}
+#nav li {
+    display:inline;
+    margin:0;
+    padding:0;
+}
+ul {
+	list-style: none;
+}
+div.imgs {
+	text-align: center;
+}
+#headerimg{
+	float: left;
+}
   </style>
 </head>
 
 <body>
-
-<h1>RPN Calculator 104k</h1>
-
-<p><a href="https://github.com/CIVYSH/rpncalc104k/raw/master/RPNCalc104k.apk">
-APK installer for Android</a></p>
-
+<table class="wrapper">
+  <tr>
+		<td class="header" colspan=2>
+			<img id="headerimg" src="rpnc104k-icon.png" alt="header img" height="100px"/><h1>RPN Calculator 104k</h1>
+		</td>
+	</tr>
+  <tr>
+		<td class="nav" colspan=2>
+			<ul id="nav">
+				<li><a href="https://github.com/CIVYSH/rpncalc104k/raw/master/RPNCalc104k.apk">
+					Download</a>
+				</li>
+				<li><a href="#quotes">Quotes</a>
+				</li>
+				<li><a href="#screenshots">Screenshots</a>
+				</li>
+			</ul>
+		</td>
+  </tr>
+  <tr>
+    <td class="main">
+			<h3>Info</h3>
+      <p>RPNCalc104k is a calculator for Android which uses the 
+      <a href="https://en.wikipedia.org/wiki/Reverse_Polish_notation">
+      Reverse Polish Notation</a>
+			to perform the calculations. That is, if you want to get the surface of a circle
+			with radius 104 you will do:
+			</p>
+			<p><code>S = PI * r²</code></p>
+			<div class="imgs">
+				<img src="bt-pi.jpg" alt="pi" height="50px"/>
+				<img src="bt-enter.jpg" alt="enter" height="50px"/>
+				<img src="bt-1.jpg" alt="1" height="50px"/>
+				<img src="bt-0.jpg" alt="0" height="50px"/>
+				<img src="bt-4.jpg" alt="4" height="50px"/>
+				<img src="bt-enter.jpg" alt="enter" height="50px"/>
+				<img src="bt-square.jpg" alt="square" height="50px"/>
+				<img src="bt-mul.jpg" alt="mul" height="50px"/>
+			</div>
+			<p>or even easier:</p>
+			<div class="imgs">
+				<img src="bt-1.jpg" alt="1" height="50px"/>
+				<img src="bt-0.jpg" alt="0" height="50px"/>
+				<img src="bt-4.jpg" alt="4" height="50px"/>
+				<img src="bt-square.jpg" alt="square" height="50px"/>
+				<img src="bt-pi.jpg" alt="pi" height="50px"/>
+			</div>
+			<p>
+			This piece of software is licensed under the 
+			<a href="http://www.gnu.org/licenses/quick-guide-gplv3.html">GPLv3</a>. That means you can
+			download and install it for free and enjoy its features:
+			</p>
+			<ul>
+				<li>Basic operations ( + * sqrt ... )</li>
+				<li>Trigonometric functions ( sin cos tan rad/deg ... )</li>
+				<li>Extra functions ( log mean surface-of-a-triangle ... )</li>
+				<li>History saver to go back and fordward</li>
+			</ul>
+			<h3 id="quotes">Quotes</h3>
+			<ul>
+				<li>Rachid Shirazi:<blockquote>I use it everyday at work.</blockquote></li>
+				<li>Ezra Kabbah:<blockquote>One of the best RPN calculators I've tried. Simple but powerful.</blockquote></li>
+				<li>Chloe Rivera:<blockquote>Its layout and functions suit my needs perfectly.</blockquote></li>
+				<li>Vince Dubois:<blockquote>I once used the default calculator on Android. No more!</blockquote></li>
+				<li>Mia Heikkilä:<blockquote>I've seen other calculators on the Google Store but they're bloated with things I never use or come with adds. I like this one</blockquote></li>
+				<li>William Wilson:<blockquote>Wonderful.</blockquote></li>
+				<li>建刘:<blockquote>雞肉飯和面, 請</blockquote></li>
+				<li>Oliver Yadav:<blockquote>Aesthetically pleasing.</blockquote></li>
+			</ul>
+			<h3 id="screenshots">Screenshots</h3>
+			<div class="imgs">
+				<img src="screenshot-18-large-land.jpg" alt="screenshot" width="400px"/>
+				<img src="screenshot-18-normal-land.jpg" alt="screenshot" width="400px"/>
+				<img src="screenshot-18-normal-port.jpg" alt="screenshot" width="400px"/>
+			</div>
+    </td>
+    <td class="sidebar">
+			<p><a href="https://github.com/CIVYSH/rpncalc104k/raw/master/RPNCalc104k.apk">
+			APK installer for Android</a>
+			</p>
+			<p>View code on <a href="https://github.com/CIVYSH/rpncalc104k">GitHub</a></p>
+			<p><img src="https://en.wikipedia.org/wiki/File:GPLv3_Logo.svg" alt="gplv3-logo" width="60px"/></p>
+    </td>
+  </tr>
+  <tr><td class="footer" colspan=2>
+	RPNCalc104k is hosted on <a href="https://github.com/">GitHub</a></td></tr>
+</table>
 </body>
 </html>
