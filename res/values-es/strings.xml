@@ -17,6 +17,8 @@
     <string name="surfaceOfTriangle">Área de un triángulo (3 lados)</string>
     <string name="hypotenusePythagoras">Hipotenusa de un triángulo (2 lados)</string>
     <string name="legPythagoras">Cateto de un triángulo recto (2 lados)</string>
+    <string name="surfaceOfCircle">Área de un círculo (radius)</string>
+    <string name="negativeRadius">El radio no puede ser negativo</string>
     <string name="logOutOfRange">Log fuera del rango (0, +inf)</string>
     <string name="undo">Deshacer</string>
     <string name="redo">Rehacer</string>

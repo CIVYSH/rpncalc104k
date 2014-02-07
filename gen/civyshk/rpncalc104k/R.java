@@ -147,12 +147,13 @@ public final class R {
         public static final int butUndo=0x7f0a0005;
         public static final int layoutButtons=0x7f0a000d;
         public static final int layoutNumbers=0x7f0a0003;
-        public static final int menuAngleMode=0x7f0a0041;
+        public static final int menuAngleMode=0x7f0a0042;
         public static final int menuApplyFunction=0x7f0a003c;
-        public static final int menuClear=0x7f0a0040;
+        public static final int menuClear=0x7f0a0041;
         public static final int menuHypotenusePythagoras=0x7f0a003e;
         public static final int menuLegPythagoras=0x7f0a003f;
         public static final int menuRedo=0x7f0a003b;
+        public static final int menuSurfaceCircle=0x7f0a0040;
         public static final int menuSurfaceTriangle=0x7f0a003d;
         public static final int menuUndo=0x7f0a003a;
         public static final int parentDigits=0x7f0a0004;
@@ -187,16 +188,18 @@ public final class R {
         public static final int function___=0x7f06000c;
         public static final int hypotenusePythagoras=0x7f06000e;
         public static final int legPythagoras=0x7f06000f;
-        public static final int logOutOfRange=0x7f060010;
+        public static final int logOutOfRange=0x7f060012;
+        public static final int negativeRadius=0x7f060011;
         public static final int negativeSquareRoot=0x7f060006;
         public static final int notATriangle=0x7f060007;
         public static final int notEnoughArguments=0x7f060003;
         public static final int operationNotImplemented=0x7f06000b;
-        public static final int redo=0x7f060012;
+        public static final int redo=0x7f060014;
         public static final int sideCantBeNegative=0x7f060008;
+        public static final int surfaceOfCircle=0x7f060010;
         public static final int surfaceOfTriangle=0x7f06000d;
-        public static final int switchAngleMode=0x7f060013;
-        public static final int undo=0x7f060011;
+        public static final int switchAngleMode=0x7f060015;
+        public static final int undo=0x7f060013;
     }
     public static final class style {
         /**  Base application theme, dependent on API level. This theme is replaced

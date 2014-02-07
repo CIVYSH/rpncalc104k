@@ -29,7 +29,10 @@
                 android:title="@string/hypotenusePythagoras" />
             <item 
                 android:id="@+id/menuLegPythagoras"
-                android:title="@string/legPythagoras" />          
+                android:title="@string/legPythagoras" />
+			<item 
+                android:id="@+id/menuSurfaceCircle"
+                android:title="@string/surfaceOfCircle" />    
         </menu>        
     </item>
     

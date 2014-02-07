@@ -1,3 +1,22 @@
+/*	RPNCalc104k - Calculator for Android using RPN notation
+ * 	Copyright 2014 Yeshe Santos García <civysh@outlook.com>
+ *	
+ *	This file is part of RPNCalc104k
+ *	
+ *	RPNCalc104k is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package civyshk.rpncalc104k;
 
 import java.lang.reflect.Field;
@@ -71,7 +90,7 @@ public class MainActivity extends Activity{
 		SINE, COSINE, TANGENT, 
 		ARCSINE, ARCCOSINE, ARCTANGENT,
 		DTOR, RTOD, SUMMATION, MEAN,
-		TRIANGLE_SURFACE, HYPOTENUSE_PYTHAGORAS, LEG_PYTHAGORAS,
+		TRIANGLE_SURFACE, HYPOTENUSE_PYTHAGORAS, LEG_PYTHAGORAS, CIRCLE_SURFACE, 
 		CONSTANTPI, CONSTANTE
 	}
 	enum UndoType{
@@ -497,24 +516,6 @@ public class MainActivity extends Activity{
 		showOnly(scrollViewDigits);
 		tvWritingDigits = (TextView) findViewById(R.id.writingDigits);
 		
-/*
-		View rootView = (View) findViewById(R.id.rootView);
-		String tag = (String) rootView.getTag();
-		tvDigits.setText(tag);
-		toast(tag);
-		DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        if(metrics.density < 0.8){
-        	toast("ldpi");
-        }else if(metrics.density < 1.3){
-        	toast("mdpi");
-        }else if(metrics.density < 1.8){
-        	toast("hdpi");
-        }else{
-        	toast("xhdpi");
-        }
-*/
-		
 		((ImageButton) findViewById(R.id.butAddition)).setOnClickListener(listenerOperations);
 		((ImageButton) findViewById(R.id.butMultiplication)).setOnClickListener(listenerOperations);
 		((ImageButton) findViewById(R.id.butExponentiation)).setOnClickListener(listenerOperations);
@@ -624,7 +625,6 @@ public class MainActivity extends Activity{
 		}
 		}
 		
-		//fix width for undo & redo buttons , to match other buttons
 		if(layoutUsesViewAnimator){
 			Button b1 = (Button) findViewById(R.id.but1);
 			Button b2 = (Button) findViewById(R.id.but2);
@@ -635,12 +635,10 @@ public class MainActivity extends Activity{
 			b1.getViewTreeObserver().addOnPreDrawListener((ViewTreeObserver.OnPreDrawListener) copierUndo);
 			b2.getViewTreeObserver().addOnPreDrawListener((ViewTreeObserver.OnPreDrawListener) copierRedo);
 		}
-		//HACER en versiones de android pequeñas, donde no hay temas con action bar
-		//mostrar undo y redo.
 		
-		// HACER remove this hack which always shows overflow menu in actionbar.
-		// Used only on emulator with real+invisible hardware keys
-		try{
+		// remove? this hack which always shows overflow menu in actionbar.
+		// Used only on emulator with invisible hardware keys
+		/*try{
 			ViewConfiguration config = ViewConfiguration.get(this);
 			Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
 			if(menuKeyField != null){
@@ -649,7 +647,7 @@ public class MainActivity extends Activity{
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
 		
 	}
 	class ViewsWidthCopier implements ViewTreeObserver.OnPreDrawListener{
@@ -691,6 +689,9 @@ public class MainActivity extends Activity{
 			return true;
 		case R.id.menuLegPythagoras:
 			touchedOperation(2, Operation.LEG_PYTHAGORAS);
+			return true;
+		case R.id.menuSurfaceCircle:
+			touchedOperation(1, Operation.CIRCLE_SURFACE);
 			return true;
 		case R.id.menuAngleMode:
 			if(angleMode.equals("deg")){
@@ -749,7 +750,6 @@ public class MainActivity extends Activity{
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		optionsMenu = menu; 
 		boolean b = super.onCreateOptionsMenu(menu);
-//		toast("onCreateOptionsMenu");
 		return b;
 	}
 	ArrayList <String> buildStringArrayListNumbers(List <BigDecimal> numbers){
@@ -787,8 +787,7 @@ public class MainActivity extends Activity{
 		}
 	}
 	void touchedDelete(boolean save){
-		if(getShownView() == scrollViewError){// sera false siempre que se llame desde
-										// delete.redo
+		if(getShownView() == scrollViewError){// false when called from delete.redo()
 			tvError.setText("");
 			tvDigits.setText("");
 			setWritingDigits(true);
@@ -853,6 +852,7 @@ public class MainActivity extends Activity{
 			showOnly(scrollViewDigits);
 			listNumbers.removeLast();
 			removeLastNumber();
+		//if there are not digits, delete last number
 		}else if(listNumbers.size() != 0){
 			if(save)
 				historySaver.savePop(listNumbers.getLast());
@@ -1044,6 +1044,14 @@ public class MainActivity extends Activity{
 				case RTOD:
 					result = new BigDecimal(Math.toDegrees(operand[0].doubleValue())).setScale(defaultScale,
 							defaultRounding);
+				break;
+				case CIRCLE_SURFACE:
+					if(operand[0].compareTo(BigDecimal.ZERO) < 0){
+						error = getResources().getString(R.string.negativeRadius);
+					}else{
+						result = operand[0].pow(2).multiply(new BigDecimal(CONSTANT_PI)).setScale(defaultScale,
+							defaultRounding);
+					}
 				break;
 				default:
 					error = getResources().getString(R.string.operationNotImplemented);

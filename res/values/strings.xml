@@ -17,6 +17,8 @@
     <string name="surfaceOfTriangle">Surface of triangle (3 sides)</string>
     <string name="hypotenusePythagoras">Hypotenuse in right triangle (2 sides)</string>
     <string name="legPythagoras">Leg in right triangle (2 sides)</string>
+    <string name="surfaceOfCircle">Surface of circle (radius)</string>
+    <string name="negativeRadius">Radius can\'t be negative</string>
     <string name="logOutOfRange">Log out of range (0, +inf)</string>
     <string name="undo">Undo</string>
     <string name="redo">Redo</string>
