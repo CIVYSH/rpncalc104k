@@ -1,0 +1,211 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+* .directory
+* .gitignore
+* LICENSE
+* README.md
+* RPNCalc104k.apk
+* ic_rpn_calc-web.png
+* pages/
+* pages/.directory
+* pages/.git/
+* pages/.git/COMMIT_EDITMSG
+* pages/.git/FETCH_HEAD
+* pages/.git/HEAD
+* pages/.git/ORIG_HEAD
+* pages/.git/config
+* pages/.git/description
+* pages/.git/gitk.cache
+* pages/.git/hooks/
+* pages/.git/hooks/applypatch-msg.sample
+* pages/.git/hooks/commit-msg.sample
+* pages/.git/hooks/post-update.sample
+* pages/.git/hooks/pre-applypatch.sample
+* pages/.git/hooks/pre-commit.sample
+* pages/.git/hooks/pre-rebase.sample
+* pages/.git/hooks/prepare-commit-msg.sample
+* pages/.git/hooks/update.sample
+* pages/.git/index
+* pages/.git/info/
+* pages/.git/info/exclude
+* pages/.git/logs/
+* pages/.git/logs/HEAD
+* pages/.git/logs/refs/
+* pages/.git/logs/refs/heads/
+* pages/.git/logs/refs/heads/gh-pages
+* pages/.git/logs/refs/heads/master
+* pages/.git/logs/refs/remotes/
+* pages/.git/logs/refs/remotes/origin/
+* pages/.git/logs/refs/remotes/origin/HEAD
+* pages/.git/logs/refs/remotes/origin/gh-pages
+* pages/.git/objects/
+* pages/.git/objects/00/
+* pages/.git/objects/00/784229a4ca7defc07cc9e3cf704924b1881e2f
+* pages/.git/objects/01/
+* pages/.git/objects/01/620532e8c64a48017c046bb265fb909635b13a
+* pages/.git/objects/0b/
+* pages/.git/objects/0b/b09c586b14fc6a05c0b9e59fd9020e15fa5b3f
+* pages/.git/objects/0e/
+* pages/.git/objects/0e/57d4e23e04f675e4f9b9c004b74508ab0ecf12
+* pages/.git/objects/19/
+* pages/.git/objects/19/20bef193c8f0b3ca347d263461aa6d00f58ad2
+* pages/.git/objects/1c/
+* pages/.git/objects/1c/66078e9d7d1cb8d327fd2115ed0a6cfe65f678
+* pages/.git/objects/1f/
+* pages/.git/objects/1f/256c2979ac512068edf8b020fc3853164864c0
+* pages/.git/objects/20/
+* pages/.git/objects/20/36746ea40f576a81f621351a8ee22ee215f279
+* pages/.git/objects/24/
+* pages/.git/objects/24/fe0baa37459d4d895c871afdff0caa0de029b4
+* pages/.git/objects/31/
+* pages/.git/objects/31/7275f54cf66b23e1d1c44e0845b6cba45de7d2
+* pages/.git/objects/38/
+* pages/.git/objects/38/14cbfa0d8436782410839d193d261f1111982c
+* pages/.git/objects/38/c0b36e2845b2a5c590d9e83ee1c36cee944a95
+* pages/.git/objects/43/
+* pages/.git/objects/43/aad2f0bcad7ec34000104ac5628f5cb181aee6
+* pages/.git/objects/4b/
+* pages/.git/objects/4b/ed463978257894cfb4f2afb9a72aa4f827e32b
+* pages/.git/objects/4e/
+* pages/.git/objects/4e/07dd68b757b1cfb597e3556798dff3d174b88c
+* pages/.git/objects/57/
+* pages/.git/objects/57/6951b4c0cb0f68238f8383497b40ffddd77dd8
+* pages/.git/objects/59/
+* pages/.git/objects/59/84baedac17c05653c6aec3589683c31b491d1a
+* pages/.git/objects/5b/
+* pages/.git/objects/5b/25ba306d0f7127918ebcf1b0573c15e2162098
+* pages/.git/objects/5b/d9a43645b57233adc2516129b68015892a95d4
+* pages/.git/objects/68/
+* pages/.git/objects/68/7e46dfa647504abcb3986144db0f94dfb753d2
+* pages/.git/objects/69/
+* pages/.git/objects/69/dceb906bd1affaf4296803d14fe9fe856f2d13
+* pages/.git/objects/72/
+* pages/.git/objects/72/cdbddc6330d4ea9117d1d195c96c6cb1982529
+* pages/.git/objects/79/
+* pages/.git/objects/79/575bc56530ae10f744bfe8b58c479ffc7e9242
+* pages/.git/objects/7b/
+* pages/.git/objects/7b/420929852e2a493912426230cb042d861abd4c
+* pages/.git/objects/7d/
+* pages/.git/objects/7d/c29030fb2e41f8146789a73200a1f5960ef9aa
+* pages/.git/objects/80/
+* pages/.git/objects/80/3c7453092888e99326459588169f93f9bd06ac
+* pages/.git/objects/82/
+* pages/.git/objects/82/fed13cc0c31d9a0accd5df6d546c6ba16f85a7
+* pages/.git/objects/8e/
+* pages/.git/objects/8e/58f2d96005d23121bfae37cd2d25f84bfecc33
+* pages/.git/objects/95/
+* pages/.git/objects/95/ca386dc5540e41c8aa80225db97c5aca9b852c
+* pages/.git/objects/a2/
+* pages/.git/objects/a2/002ab307825b32e7cfd80fc96db8f667cd1dfc
+* pages/.git/objects/a3/
+* pages/.git/objects/a3/970d35581e51e942846ced2fad5d4bbcfa3ea0
+* pages/.git/objects/a4/
+* pages/.git/objects/a4/a9566ee09cee40692a8b051c5558d94073c547
+* pages/.git/objects/a9/
+* pages/.git/objects/a9/4276519e8ac1937a0f7c686ad5018bf73ba972
+* pages/.git/objects/ab/
+* pages/.git/objects/ab/b2ceb10fa029f8a30f44624ad03412f0e13371
+* pages/.git/objects/ae/
+* pages/.git/objects/ae/1108d8ecfc4b2b8e7d1e93b6489f449e670745
+* pages/.git/objects/b4/
+* pages/.git/objects/b4/ca661e5d34bd191963d19aa11f5599f29dae31
+* pages/.git/objects/b8/
+* pages/.git/objects/b8/991641f70347affe16a182be7428aa0c657c87
+* pages/.git/objects/c3/
+* pages/.git/objects/c3/1addc83ac135647978af53717e8f7bb1080d9e
+* pages/.git/objects/ca/
+* pages/.git/objects/ca/745d2ea2930b2022659fcca318ea73abb551c2
+* pages/.git/objects/cd/
+* pages/.git/objects/cd/f0dd4d3f57d50460f6598ab19e470bce0f4f8f
+* pages/.git/objects/ce/
+* pages/.git/objects/ce/7195cc32ce77729c5abeba5340211d9df4c819
+* pages/.git/objects/d2/
+* pages/.git/objects/d2/ae1de281e52af169505c0a74100f5158bf1e56
+* pages/.git/objects/d4/
+* pages/.git/objects/d4/556a09bb093b4b55b11d3ed1240feaac4bf9df
+* pages/.git/objects/dd/
+* pages/.git/objects/dd/c99ef625b47107b57a1c1a664c1746e37a48dd
+* pages/.git/objects/de/
+* pages/.git/objects/de/73e1be7acd942f4756a0536a3f6633cb68b122
+* pages/.git/objects/e3/
+* pages/.git/objects/e3/1b66f845bd02427b5b204f2626c0c226b3a123
+* pages/.git/objects/e3/4feab9f58de43f50938d723ecf2fc974be9be0
+* pages/.git/objects/eb/
+* pages/.git/objects/eb/0eb563a85e4409543c60f00eed21325ee07cf0
+* pages/.git/objects/eb/a4e2643d478b69ff4a94604ba3afa2d065b057
+* pages/.git/objects/eb/f707c3188a8d3c521a227b88e17f9a4696aba4
+* pages/.git/objects/ef/
+* pages/.git/objects/ef/2a13a74e324636c80fef1a08a1a17eb27306eb
+* pages/.git/objects/f1/
+* pages/.git/objects/f1/30086f7c67dcdd1f1df2430f9e0612f44c04c4
+* pages/.git/objects/pack/
+* pages/.git/objects/pack/pack-7523476068b0d573cfba66e59b37cf5b571a5b5c.idx
+* pages/.git/objects/pack/pack-7523476068b0d573cfba66e59b37cf5b571a5b5c.pack
+* pages/.git/packed-refs
+* pages/.git/refs/
+* pages/.git/refs/heads/
+* pages/.git/refs/heads/gh-pages
+* pages/.git/refs/heads/master
+* pages/.git/refs/remotes/
+* pages/.git/refs/remotes/origin/
+* pages/.git/refs/remotes/origin/HEAD
+* pages/.git/refs/remotes/origin/gh-pages
+* pages/bt-0.jpg
+* pages/bt-1.jpg
+* pages/bt-3.jpg
+* pages/bt-4.jpg
+* pages/bt-decimal.jpg
+* pages/bt-enter.jpg
+* pages/bt-mul.jpg
+* pages/bt-pi.jpg
+* pages/bt-square.jpg
+* pages/index.html
+* pages/rpnc104k-icon.png
+* pages/screenshot-18-large-land.jpg
+* pages/screenshot-18-normal-land.jpg
+* pages/screenshot-18-normal-port.jpg
+* proguard-project.txt
+
+Replaced Jars with Dependencies:
+--------------------------------
+The importer recognized the following .jar files as third party
+libraries and replaced them with Gradle dependencies instead. This has
+the advantage that more explicit version information is known, and the
+libraries can be updated automatically. However, it is possible that
+the .jar file in your project was of an older version than the
+dependency we picked, which could render the project not compileable.
+You can disable the jar replacement in the import wizard and try again:
+
+android-support-v4.jar => com.android.support:support-v4:19.1.0
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+* AndroidManifest.xml => app/src/main/AndroidManifest.xml
+* assets/ => app/src/main/assets
+* res/ => app/src/main/res/
+* src/ => app/src/main/java/
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)

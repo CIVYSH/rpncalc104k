@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *	RPNCalc104k - Calculator for Android using RPN notation
+ * 	Copyright 2014 Yeshe Santos García <civysh@outlook.com>
+ *	
+ *	This file is part of RPNCalc104k
+ *	
+ *	RPNCalc104k is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="0dp"
+    android:padding="0dp" >      
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:id="@+id/butSine"
+            android:src="@drawable/op_sine"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butArcSine"
+            android:src="@drawable/op_arcsine"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />  
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:id="@+id/butCosine"
+            android:src="@drawable/op_cosine"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butArcCosine"
+            android:src="@drawable/op_arccosine"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >
+        <ImageButton
+            android:id="@+id/butTangent"
+            android:src="@drawable/op_tangent"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />     
+        <ImageButton
+            android:id="@+id/butArcTangent"
+            android:src="@drawable/op_arctangent"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />  
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >       
+        <ImageButton
+            android:id="@+id/butDegreeToRadian"
+            android:src="@drawable/op_toradian"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />
+        <ImageButton
+            android:id="@+id/butRadianToDegree"
+            android:src="@drawable/op_todegree"
+                    android:layout_height="fill_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+            style="@style/buttonStyle.Operation" />       
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        style="@style/layoutButtonsLevel_1" >        
+        <ImageButton
+            android:id="@+id/butFunctions1to0"
+            android:src="@drawable/ic_action_previous_item"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.ChangePage" />  
+        <ImageButton
+            android:id="@+id/butFunctions1to2"
+            android:src="@drawable/ic_action_next_item"
+            android:layout_height="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/buttonStyle.ChangePage" />  
+    </LinearLayout>
+</LinearLayout><!-- From: file:/media/besokare/1TB/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/layout/extra_functions_1.xml -->
