@@ -5,4 +5,4 @@
 
 [Google Play](https://play.google.com/store/apps/details?id=net.project104.civyshkrpncalc)
 
-[Download APK](https://raw.githubusercontent.com/civyshk/rpncalc104k/master/app/app-release.apk)
+[Download for Android](https://raw.githubusercontent.com/civyshk/rpncalc104k/master/app/app-release.apk)
