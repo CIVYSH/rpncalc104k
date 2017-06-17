@@ -23,4 +23,6 @@
     <string name="undo">Undo</string>
     <string name="redo">Redo</string>
     <string name="switchAngleMode">Switch deg/rad</string>
+    <string name="negativeBaseExponentiation">Base is negative and exponent is not an integer</string>
+    <string name="negativeRadicand">Radicand is negative</string>
 </resources>

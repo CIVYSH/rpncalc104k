@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="layout_uses_view_animator">true</bool>
+    <color name="activity_background_color">#242433</color>
+    <color name="button_control_dark_color">#26152b</color>
+    <color name="button_control_enter_dark_color">#1a2b25</color>
+    <color name="button_control_enter_light_color">#326c59</color>
+    <color name="button_control_light_color">#5b3c63</color>
+    <color name="button_control_pop_dark_color">#3b1c22</color>
+    <color name="button_control_pop_light_color">#ac3444</color>
+    <color name="button_digit_dark_color">#1b1e36</color>
+    <color name="button_digit_light_color">#3a427b</color>
+    <color name="button_operation_dark_color">#1b1b1b</color>
+    <color name="button_operation_light_color">#5e5e5e</color>
+    <color name="button_page_dark_color">#301b36</color>
+    <color name="button_page_light_color">#674171</color>
+    <color name="button_text_color">@android:color/primary_text_dark</color>
+    <color name="error_text_color">#FFEEEEEE</color>
+    <dimen name="activity_horizontal_margin">0dp</dimen>
+    <dimen name="activity_vertical_margin">0dp</dimen>
+    <dimen name="angle_text_size">12sp</dimen>
+    <dimen name="angle_view_width">22sp</dimen>
+    <dimen name="button_digit_text_size">28sp</dimen>
+    <dimen name="button_operation_padding">0dp</dimen>
+    <dimen name="error_text_size">16sp</dimen>
+    <dimen name="layout_digits_height">46sp</dimen>
+    <dimen name="layout_numbers_height">24sp</dimen>
+    <dimen name="layout_top_height">72sp</dimen>
+    <dimen name="list_digits_text_size">40sp</dimen>
+    <dimen name="list_numbers_text_size">20sp</dimen>
+    <dimen name="number_view_horiz_margin">7sp</dimen>
+    <dimen name="writing_view_margin">10sp</dimen>
+    <dimen name="writing_view_padding">3dp</dimen>
+    <string name="app_name">104 RPN Calc</string>
+    <string name="arccosineOutOfRange">Arccosine out of range [-1, 1]</string>
+    <string name="arcsineOutOfRange">Arcsine out of range [-1, 1]</string>
+    <string name="clear">Clear</string>
+    <string name="decimalSeparator">.</string>
+    <string name="divisionByZero">Division by zero</string>
+    <string name="error">Error</string>
+    <string name="function...">Function…</string>
+    <string name="hypotenusePythagoras">Hypotenuse in right triangle (2 sides)</string>
+    <string name="legPythagoras">Leg in right triangle (2 sides)</string>
+    <string name="logOutOfRange">Log out of range (0, +inf)</string>
+    <string name="negativeBaseExponentiation">Base is negative and exponent is not an integer</string>
+    <string name="negativeRadicand">Radicand is negative</string>
+    <string name="negativeRadius">Radius can\'t be negative</string>
+    <string name="negativeSquareRoot">Negative square root</string>
+    <string name="notATriangle">Not a triangle</string>
+    <string name="notEnoughArguments">Not enough operands</string>
+    <string name="operationNotImplemented">Operation not implemented</string>
+    <string name="redo">Redo</string>
+    <string name="sideCantBeNegative">Sides can\'t be negative</string>
+    <string name="surfaceOfCircle">Surface of circle (radius)</string>
+    <string name="surfaceOfTriangle">Surface of triangle (3 sides)</string>
+    <string name="switchAngleMode">Switch deg/rad</string>
+    <string name="undo">Undo</string>
+    <style name="AppBaseTheme" parent="android:Theme"/>
+    <style name="AppTheme" parent="AppBaseTheme">
+    </style>
+    <style name="buttonStyle">
+        <item name="android:padding">0dp</item>
+         <item name="android:textColor">@color/button_text_color</item>
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginRight">1dp</item>    
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+    <style name="buttonStyle.ChangePage">
+        <item name="android:background">@drawable/button_control</item>
+    </style>
+    <style name="buttonStyle.Control">
+        <item name="android:background">@drawable/button_control</item>
+    </style>
+    <style name="buttonStyle.Control.Enter">
+        <item name="android:background">@drawable/button_control_enter</item>
+    </style>
+    <style name="buttonStyle.Control.Pop">
+        <item name="android:background">@drawable/button_control_pop</item>
+    </style>
+    <style name="buttonStyle.Digit">
+        <item name="android:background">@drawable/button_digit</item>
+        <item name="android:textSize">@dimen/button_digit_text_size</item>        
+    </style>
+    <style name="buttonStyle.Operation">
+        <item name="android:background">@drawable/button_operation</item>
+        <item name="android:padding">@dimen/button_operation_padding</item>
+    </style>
+    <style name="layoutButtonsLevel_1">
+        
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+    <style name="layoutButtonsLevel_2">
+        
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+</resources>

@@ -1,0 +1,28 @@
+[
+    {
+        "outputFile": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-land-v11/values-land-v11.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endLine": 4,
+                    "endColumn": 12,
+                    "endOffset": 181
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-land-v11/styles.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 4,
+                        "startOffset": 177,
+                        "endLine": 8,
+                        "endColumn": 12,
+                        "endOffset": 303
+                    }
+                }
+            }
+        ]
+    }
+]

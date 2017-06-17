@@ -1,0 +1,235 @@
+[
+    {
+        "outputFile": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-xlarge-v4/values-xlarge-v4.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 46,
+                    "endOffset": 97
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 9,
+                        "startColumn": 4,
+                        "startOffset": 326,
+                        "endColumn": 46,
+                        "endOffset": 368
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 102,
+                    "endColumn": 47,
+                    "endOffset": 145
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 8,
+                        "startColumn": 4,
+                        "startOffset": 278,
+                        "endColumn": 47,
+                        "endOffset": 321
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 4,
+                    "startColumn": 4,
+                    "startOffset": 150,
+                    "endColumn": 53,
+                    "endOffset": 199
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 19,
+                        "startColumn": 4,
+                        "startOffset": 647,
+                        "endColumn": 53,
+                        "endOffset": 696
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 5,
+                    "startColumn": 4,
+                    "startOffset": 204,
+                    "endColumn": 46,
+                    "endOffset": 246
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 14,
+                        "startColumn": 4,
+                        "startOffset": 488,
+                        "endColumn": 46,
+                        "endOffset": 530
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 6,
+                    "startColumn": 4,
+                    "startOffset": 251,
+                    "endColumn": 51,
+                    "endOffset": 298
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 11,
+                        "startColumn": 4,
+                        "startOffset": 378,
+                        "endColumn": 51,
+                        "endOffset": 425
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 7,
+                    "startColumn": 4,
+                    "startOffset": 303,
+                    "endColumn": 52,
+                    "endOffset": 351
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 4,
+                        "startColumn": 4,
+                        "startOffset": 110,
+                        "endColumn": 52,
+                        "endOffset": 158
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 8,
+                    "startColumn": 4,
+                    "startOffset": 356,
+                    "endColumn": 49,
+                    "endOffset": 401
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 2,
+                        "startColumn": 4,
+                        "startOffset": 55,
+                        "endColumn": 49,
+                        "endOffset": 100
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 9,
+                    "startColumn": 4,
+                    "startOffset": 406,
+                    "endColumn": 52,
+                    "endOffset": 454
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 12,
+                        "startColumn": 4,
+                        "startOffset": 430,
+                        "endColumn": 52,
+                        "endOffset": 478
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 10,
+                    "startColumn": 4,
+                    "startOffset": 459,
+                    "endColumn": 53,
+                    "endOffset": 508
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 4,
+                        "startOffset": 219,
+                        "endColumn": 53,
+                        "endOffset": 268
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 11,
+                    "startColumn": 4,
+                    "startOffset": 513,
+                    "endColumn": 55,
+                    "endOffset": 564
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 5,
+                        "startColumn": 4,
+                        "startOffset": 163,
+                        "endColumn": 55,
+                        "endOffset": 214
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 12,
+                    "startColumn": 4,
+                    "startOffset": 569,
+                    "endColumn": 50,
+                    "endOffset": 615
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 17,
+                        "startColumn": 4,
+                        "startOffset": 591,
+                        "endColumn": 50,
+                        "endOffset": 637
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 13,
+                    "startColumn": 4,
+                    "startOffset": 620,
+                    "endColumn": 50,
+                    "endOffset": 666
+                },
+                "from": {
+                    "file": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/values-xlarge/dimens.xml",
+                    "position": {
+                        "startLine": 16,
+                        "startColumn": 4,
+                        "startOffset": 540,
+                        "endColumn": 50,
+                        "endOffset": 586
+                    }
+                }
+            }
+        ]
+    }
+]

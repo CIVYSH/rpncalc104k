@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/button_operation.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/button_operation.xml"
+    },
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/activity_background.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/activity_background.xml"
+    },
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/button_control_pop.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/button_control_pop.xml"
+    },
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/button_control.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/button_control.xml"
+    },
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/button_change_page.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/button_change_page.xml"
+    },
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/button_control_enter.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/button_control_enter.xml"
+    },
+    {
+        "merged": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/res/merged/debug/drawable/button_digit.xml",
+        "source": "/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/src/main/res/drawable/button_digit.xml"
+    }
+]

@@ -38,6 +38,7 @@
     <style name="buttonStyle.ChangePage" >
         <item name="android:background">@drawable/button_control</item>
     </style>
+
     <style name="layoutButtonsLevel_1" >
         <!--  <item name="android:orientation">horizontal</item> -->
         <item name="android:layout_width">fill_parent</item>

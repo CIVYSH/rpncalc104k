@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "net.project104.civyshkrpncalc"
-        minSdkVersion 4
+        minSdkVersion 8
         targetSdkVersion 22
         versionCode 2
         versionName "1.0"
