@@ -4,11 +4,8 @@ gradle/
 .gradle/
 gradle*
 local*
-/.idea/
 .directory
 .settings/
-DragNDropList-hardcoded/
-DragNDropList-gitadded//
 
 #website has its own branch gh-pages
 pages/
