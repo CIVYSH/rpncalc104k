@@ -27,6 +27,6 @@
     <string name="negativeRadicand">Radicand is negative</string>
     <string name="nIsNotInteger">Last number is not an integer</string>
     <string name="tooManyArguments">That\'s too many arguments</string>
-    <string name="wrongFactorial">Number must be positive integer</string>
+    <string name="wrongFactorial">Number must be non-negative integer</string>
     <string name="numberTooBig">That number is too big</string>
 </resources>

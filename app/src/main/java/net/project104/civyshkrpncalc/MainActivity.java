@@ -1672,7 +1672,9 @@ public class MainActivity extends Activity {
 
 //TODO localize decimal separator: localize editableNumber & stack numbers
 //TODO highlight reordered numbers for a little while
-//TODO add litle help (dragNdrop, click on number, &c)
-//TODO replace all sqrt with custom BigSqrt
-//TODO make standard deviation with mean or something. Test estadísticos, quizás Q de dixon, etc.
+//TODO add some background to editableNumber
 //TODO fix icon fn- to exactly match fn+
+//TODO tvError gone and visible makes DEG move up and down, slightly
+//TODO add litle help (dragNdrop, click on number, &c)
+//TODO make standard deviation with mean or something. Test estadísticos, quizás Q de dixon, etc.
+//TODO replace all sqrt with custom BigSqrt

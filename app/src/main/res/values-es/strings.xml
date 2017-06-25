@@ -10,8 +10,8 @@
     <string name="negativeSquareRoot">Raíz cuadrada negativa</string>
     <string name="notATriangle">No es un triángulo</string>
     <string name="sideCantBeNegative">Ningún lado puede ser negativo</string>
-    <string name="arcsineOutOfRange">Arcseno fuera del rango [-1, 1]</string>
-    <string name="arccosineOutOfRange">Arccoseno fuera del [-1, 1]</string>
+    <string name="arcsineOutOfRange">Arcseno fuera de [-1, 1]</string>
+    <string name="arccosineOutOfRange">Arccoseno fuera de [-1, 1]</string>
     <string name="operationNotImplemented">Operación no implementada</string>
     <string name="function...">Función…</string>
     <string name="surfaceOfTriangle">Área de un triángulo (3 lados)</string>
@@ -23,4 +23,10 @@
     <string name="undo">Deshacer</string>
     <string name="redo">Rehacer</string>
     <string name="switchAngleMode">Cambiar deg/rad</string>
+    <string name="nIsNotInteger">El último número no es entero</string>
+    <string name="negativeBaseExponentiation">La base es negativa y el exponente no entero</string>
+    <string name="negativeRadicand">El radicando es negativo</string>
+    <string name="numberTooBig">Ese número es demasiado grande</string>
+    <string name="tooManyArguments">Demasiados operandos</string>
+    <string name="wrongFactorial">El número debe ser entero no negativo</string>
 </resources>

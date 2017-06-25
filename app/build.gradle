@@ -15,7 +15,7 @@ android {
     signingConfigs {
         release {
             storeFile file("android-keystore.jks")
-            keyAlias "default-key"
+            keyAlias "default"
         }
     }
 
@@ -24,7 +24,7 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            proguardFile '/home/besokare/1TB/informatica/StudioProjects/RPNCalc104k/app/proguard-rules.pro'
+            proguardFile '/home/besokare/Datos/informatica/StudioProjects/RPNCalc104k/app/proguard-rules.pro'
         }
     }
 }
