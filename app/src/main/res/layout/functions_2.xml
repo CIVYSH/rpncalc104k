@@ -28,6 +28,7 @@
 
     <LinearLayout
         style="@style/layoutButtonsLevel_1"
+        android:layout_weight="2"
         android:orientation="horizontal">
 
         <ImageButton
@@ -39,16 +40,40 @@
             android:src="@drawable/op_summation"/>
 
         <ImageButton
+            android:id="@+id/butSummationRange"
+            style="@style/buttonStyle.Operation"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:src="@drawable/op_summation_n"/>
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/layoutButtonsLevel_1"
+        android:layout_weight="2"
+        android:orientation="horizontal">
+
+        <ImageButton
             android:id="@+id/butMean"
             style="@style/buttonStyle.Operation"
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:src="@drawable/op_mean"/>
+
+        <ImageButton
+            android:id="@+id/butMeanRange"
+            style="@style/buttonStyle.Operation"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:src="@drawable/op_mean_n"/>
     </LinearLayout>
 
     <LinearLayout
         style="@style/layoutButtonsLevel_1"
+        android:layout_width="match_parent"
+        android:layout_weight="2"
         android:orientation="horizontal">
 
         <ImageButton
@@ -57,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:src="@drawable/op_summation"/>
+            android:src="@drawable/op_surface_triangle"/>
 
         <ImageButton
             android:id="@+id/butCircleSurface"
@@ -65,11 +90,13 @@
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:src="@drawable/op_summation"/>
+            android:src="@drawable/op_surface_circle"/>
+
     </LinearLayout>
 
     <LinearLayout
         style="@style/layoutButtonsLevel_1"
+        android:layout_weight="2"
         android:orientation="horizontal">
 
         <ImageButton
@@ -78,7 +105,7 @@
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:src="@drawable/op_summation"/>
+            android:src="@drawable/op_hypotenuse"/>
 
         <ImageButton
             android:id="@+id/butLegPythagoras"
@@ -86,12 +113,45 @@
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:src="@drawable/op_summation"/>
+            android:src="@drawable/op_leg"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/layoutButtonsLevel_1"
+        android:layout_width="match_parent"
+        android:layout_weight="3"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/butQuadraticEquation"
+            style="@style/buttonStyle.Operation"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:src="@drawable/op_quadratic_equation"/>
     </LinearLayout>
 
     <LinearLayout
         style="@style/layoutButtonsLevel_1"
         android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/butFunctionsLess"
+            style="@style/buttonStyle.ControlOperations"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:src="@drawable/ic_functions_less"/>
+
+        <ImageButton
+            android:id="@+id/butSwitch2"
+            style="@style/buttonStyle.ControlOperations"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:src="@drawable/ic_shuffle"/>
+
     </LinearLayout>
 
 </LinearLayout>

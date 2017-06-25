@@ -23,10 +23,6 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="horizontal"
-              android:paddingBottom="@dimen/activity_vertical_margin"
-              android:paddingLeft="@dimen/activity_horizontal_margin"
-              android:paddingRight="@dimen/activity_horizontal_margin"
-              android:paddingTop="@dimen/activity_vertical_margin"
               tools:context=".MainActivity">
 
     <LinearLayout
@@ -38,18 +34,16 @@
         android:padding="0dp">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="3">
+            android:layout_weight="6"
+            android:orientation="vertical">
 
-            <ListView
-                android:id="@+id/listNumbers"
+            <com.terlici.dragndroplist.DragNDropListView
+                android:id="@+id/listNumbersDraggable"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1">
-
-            </ListView>
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:id="@+id/parentDigits"
@@ -78,7 +72,7 @@
                         android:layout_height="match_parent"
                         android:lines="1"
                         android:scrollHorizontally="true"
-                        android:textSize="@dimen/list_digits_text_size"/>
+                        android:textSize="@dimen/editable_text_size"/>
                 </HorizontalScrollView>
 
                 <HorizontalScrollView
@@ -239,7 +233,7 @@
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
                 android:layout_weight="16"
-                android:src="@drawable/ic_scientific_notation"/>
+                android:src="@drawable/op_scientific_notation"/>
 
             <Button
                 android:id="@+id/minus"
@@ -247,7 +241,7 @@
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
                 android:layout_weight="10"
-                android:text="-"/>
+                android:text="−"/>
 
             <ImageButton
                 android:id="@+id/butEnterNumber"
@@ -262,6 +256,7 @@
 
         <LinearLayout
             style="@style/layoutButtonsLevel_1"
+            android:layout_width="match_parent"
             android:orientation="horizontal">
 
             <ImageButton
@@ -289,12 +284,13 @@
                 android:src="@drawable/ic_redo"/>
 
             <ImageButton
-                android:id="@+id/butFunctions"
+                android:id="@+id/butDegRad"
                 style="@style/buttonStyle.Control"
                 android:layout_width="0dp"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="16"
-                android:src="@drawable/ic_functions_more"/>
+                android:src="@drawable/ic_deg_rad"/>
+
         </LinearLayout>
 
     </LinearLayout>

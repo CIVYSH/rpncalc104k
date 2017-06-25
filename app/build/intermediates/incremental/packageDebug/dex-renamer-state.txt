@@ -1,7 +1,0 @@
-#Sat Jun 17 09:11:57 CEST 2017
-base.0=/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_d31869fa5cc101ba89770a869648f582cdc0c44c
-renamed.1=classes2.dex
-renamed.0=classes.dex
-file.1=/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_f9e13abdd6f1f3805d17dce096a73bc7e8194071/classes.dex
-base.1=/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_f9e13abdd6f1f3805d17dce096a73bc7e8194071
-file.0=/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_d31869fa5cc101ba89770a869648f582cdc0c44c/classes.dex

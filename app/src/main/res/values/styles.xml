@@ -29,14 +29,14 @@
     <style name="buttonStyle.Control" >
         <item name="android:background">@drawable/button_control</item>
     </style>
+    <style name="buttonStyle.ControlOperations" >
+        <item name="android:background">@drawable/button_control_operations</item>
+    </style>
     <style name="buttonStyle.Control.Enter" >
         <item name="android:background">@drawable/button_control_enter</item>
     </style>
     <style name="buttonStyle.Control.Pop" >
         <item name="android:background">@drawable/button_control_pop</item>
-    </style>
-    <style name="buttonStyle.ChangePage" >
-        <item name="android:background">@drawable/button_control</item>
     </style>
 
     <style name="layoutButtonsLevel_1" >

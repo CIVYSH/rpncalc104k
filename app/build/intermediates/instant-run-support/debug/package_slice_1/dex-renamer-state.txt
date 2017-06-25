@@ -1,4 +1,0 @@
-#Fri Jun 09 18:05:44 CEST 2017
-base.0=/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/transforms/dex/debug/folders/1000/5/slice_1
-renamed.0=classes.dex
-file.0=/media/besokare/Datos/besokare/informatica/StudioProjects/RPNCalc104k/app/build/intermediates/transforms/dex/debug/folders/1000/5/slice_1/classes.dex

@@ -1,0 +1,3 @@
+[submodule "DragNDropList"]
+	path = DragNDropList
+	url = git@github.com:civyshk/DragNDropList.git
