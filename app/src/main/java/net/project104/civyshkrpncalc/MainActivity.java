@@ -1668,13 +1668,15 @@ public class MainActivity extends Activity {
 }
 //From most important to least:
 
-//TODO release at this point. Solve above TODOs, think of below ones
-
+//TODO bug: 1000! & drag <- Fix the hack in DragNDropListView
+//TODO bug: 1000! sqrt() (operand.doubleValue() gives infinity, check that
 //TODO localize decimal separator: localize editableNumber & stack numbers
 //TODO highlight reordered numbers for a little while
 //TODO add some background to editableNumber
-//TODO fix icon fn- to exactly match fn+
+//TODO show up&down arrows in stack listview, like in LevelSelector of AnutoTD
+//TODO fix icon fn- to exactly match fn+ <- Just run convert.py and copy new drawables
 //TODO tvError gone and visible makes DEG move up and down, slightly
-//TODO add litle help (dragNdrop, click on number, &c)
+//TODO add little help (dragNdrop, click on number, &c). Where?
 //TODO make standard deviation with mean or something. Test estadísticos, quizás Q de dixon, etc.
 //TODO replace all sqrt with custom BigSqrt
+//TODO custom button layout
