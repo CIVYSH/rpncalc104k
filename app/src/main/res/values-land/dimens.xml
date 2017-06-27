@@ -1,0 +1,17 @@
+<resources>
+
+    <dimen name="number_letter_text_size">13sp</dimen>
+    <dimen name="number_letter_width">14sp</dimen>
+    <dimen name="number_index_text_size">13sp</dimen>
+    <dimen name="number_index_width">18sp</dimen>
+    <dimen name="list_numbers_text_size">15sp</dimen>
+    <dimen name="draggable_handler_size">18sp</dimen>
+
+    <dimen name="angle_view_width">20sp</dimen>
+    <dimen name="angle_text_size">9sp</dimen>
+
+    <dimen name="editable_text_size">30sp</dimen>
+
+    <dimen name="error_text_size">15sp</dimen>
+
+</resources>

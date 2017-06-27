@@ -1,0 +1,295 @@
+<!--
+ *	RPNCalc104k - Calculator for Android using RPN notation
+ * 	Copyright 2014 Yeshe Santos García <civysh@outlook.com>
+ *	
+ *	This file is part of RPNCalc104k
+ *	
+ *	RPNCalc104k is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/rootView"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/fixedLayout"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:orientation="vertical"
+        android:padding="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:orientation="vertical">
+
+            <com.terlici.dragndroplist.DragNDropListView
+                android:id="@+id/listNumbersDraggable"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <LinearLayout
+                android:id="@+id/parentDigits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="0dp">
+
+                <TextView
+                    android:id="@+id/tvAngleMode"
+                    android:layout_width="@dimen/angle_view_width"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textSize="@dimen/angle_text_size"/>
+
+                <HorizontalScrollView
+                    android:id="@+id/scrollEditableNumber"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:fillViewport="true">
+
+                    <TextView
+                        android:id="@+id/tvEditableNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:lines="1"
+                        android:scrollHorizontally="true"
+                        android:textSize="@dimen/editable_text_size"/>
+                </HorizontalScrollView>
+
+                <HorizontalScrollView
+                    android:id="@+id/scrollError"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:fillViewport="true"
+                    android:padding="0dp">
+
+                    <TextView
+                        android:id="@+id/tvError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:lines="1"
+                        android:scrollHorizontally="true"
+                        android:textColor="@color/error_text_color"
+                        android:textSize="@dimen/error_text_size"/>
+                </HorizontalScrollView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/layoutButtonsLevel_1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/but1"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="1"/>
+
+            <Button
+                android:id="@+id/but2"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="2"/>
+
+            <Button
+                android:id="@+id/but3"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="3"/>
+
+            <ImageButton
+                android:id="@+id/scientificNotation"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:src="@drawable/op_scientific_notation"/>
+
+            <ImageButton
+                android:id="@+id/butDegRad"
+                style="@style/buttonStyle.Control"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_deg_rad"/>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/layoutButtonsLevel_1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/but4"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="4"/>
+
+            <Button
+                android:id="@+id/but5"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="5"/>
+
+            <Button
+                android:id="@+id/but6"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="6"/>
+
+            <Button
+                android:id="@+id/minus"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="−"/>
+
+            <ImageButton
+                android:id="@+id/butRedo"
+                style="@style/buttonStyle.Control"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_redo"/>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/layoutButtonsLevel_1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/but7"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="7"/>
+
+            <Button
+                android:id="@+id/but8"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="8"/>
+
+            <Button
+                android:id="@+id/but9"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="9"/>
+
+            <ImageButton
+                android:id="@+id/butPopNumber"
+                style="@style/buttonStyle.Control.Pop"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_cancel"/>
+
+            <ImageButton
+                android:id="@+id/butUndo"
+                style="@style/buttonStyle.Control"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_undo"/>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/layoutButtonsLevel_1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/butDecimal"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="@string/decimalSeparator"/>
+
+            <Button
+                android:id="@+id/but0"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="0"/>
+
+            <ImageButton
+                android:id="@+id/butDelete"
+                style="@style/buttonStyle.Digit"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_backspace"/>
+
+            <ImageButton
+                android:id="@+id/butEnterNumber"
+                style="@style/buttonStyle.Control.Enter"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_accept"/>
+
+            <ImageButton
+                android:id="@+id/butClear"
+                style="@style/buttonStyle.Control"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_discard"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <ViewAnimator
+        android:id="@+id/viewSwitcher"
+        style="@style/layoutButtonsLevel_2"
+        android:layout_weight="3">
+
+        <include layout="@layout/functions_1"/>
+
+        <include layout="@layout/functions_2"/>
+    </ViewAnimator>
+</LinearLayout>
+
