@@ -1,0 +1,364 @@
+android.support.annotation.Keep -> android.support.annotation.Keep:
+com.terlici.dragndroplist.DragNDropAdapter -> com.terlici.dragndroplist.a:
+    int getDragHandler() -> a
+com.terlici.dragndroplist.DragNDropListView -> com.terlici.dragndroplist.DragNDropListView:
+    boolean mDragMode -> a
+    android.view.WindowManager mWm -> b
+    int mStartPosition -> c
+    int mDragPointOffset -> d
+    int mDragHandler -> e
+    android.widget.ImageView mDragView -> f
+    java.util.List mDragNDropListeners -> g
+    boolean isDraggingEnabled -> h
+    void init() -> b
+    void <init>(android.content.Context) -> <init>
+    void <init>(android.content.Context,android.util.AttributeSet) -> <init>
+    void <init>(android.content.Context,android.util.AttributeSet,int) -> <init>
+    void setDragNDropAdapter(com.terlici.dragndroplist.DragNDropAdapter) -> setDragNDropAdapter
+    boolean isDrag(android.view.MotionEvent) -> a
+    boolean isDragging() -> a
+    android.view.View getDragView() -> getDragView
+    boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
+    void startDrag(int,int) -> a
+    void stopDrag(int,int) -> b
+    void drag(int,int) -> c
+    void setDraggingEnabled(boolean) -> setDraggingEnabled
+com.terlici.dragndroplist.DragNDropListView$OnItemDragNDropListener -> com.terlici.dragndroplist.DragNDropListView$a:
+    void onItemDrag(com.terlici.dragndroplist.DragNDropListView,android.view.View,int,long) -> a
+    void onItemDrop(com.terlici.dragndroplist.DragNDropListView,android.view.View,int,int,long) -> a
+com.terlici.dragndroplist.R -> com.terlici.dragndroplist.b:
+com.terlici.dragndroplist.R$string -> com.terlici.dragndroplist.b$a:
+    int numberSubstitute -> numberSubstitute
+net.project104.civyshkrpncalc.MainActivity -> net.project104.civyshkrpncalc.MainActivity:
+    java.lang.String TAG -> a
+    java.math.BigDecimal BIG_PI -> b
+    java.math.BigDecimal BIG_EULER -> c
+    java.math.BigDecimal BIG_PHI -> d
+    java.math.RoundingMode ROUNDING_MODE -> e
+    java.math.MathContext DEFAULT_MATH_CONTEXT -> f
+    android.database.DataSetObserver numberStackObserver -> A
+    android.animation.ValueAnimator errorBackgroundAnimator -> B
+    java.util.LinkedList numberStack -> g
+    net.project104.civyshkrpncalc.MainActivity$ViewedString editableNumber -> h
+    boolean deleteCharBeforeDecimalSeparator -> i
+    boolean deleteCharBeforeScientificNotation -> j
+    net.project104.civyshkrpncalc.MainActivity$AngleMode angleMode -> k
+    java.lang.Integer[] digitButtonsIds -> l
+    net.project104.civyshkrpncalc.MainActivity$HistorySaver historySaver -> m
+    com.terlici.dragndroplist.DragNDropListView layoutNumbersDraggable -> n
+    android.widget.ImageView arrowUp -> o
+    android.widget.ImageView arrowDown -> p
+    android.widget.HorizontalScrollView scrollEditableNumber -> q
+    android.widget.HorizontalScrollView scrollError -> r
+    android.widget.TextView tvEditableNumber -> s
+    android.widget.TextView tvError -> t
+    android.widget.TextView tvAngleMode -> u
+    android.widget.ViewAnimator switcherFunctions -> v
+    net.project104.civyshkrpncalc.NumberStackDraggableAdapter numberStackDraggableAdapter -> w
+    net.project104.civyshkrpncalc.MainActivity$StackAnimator stackAnimator -> x
+    java.util.HashMap operationsData -> C
+    net.project104.civyshkrpncalc.MainActivity$MyOnClickListener clickListenerDigitButtons -> y
+    net.project104.civyshkrpncalc.MainActivity$MyOnClickListener clickListenerOperations -> z
+    void <init>() -> <init>
+    net.project104.civyshkrpncalc.MainActivity$Operation getOperationFromBtnId(int) -> a
+    void onCreate(android.os.Bundle) -> onCreate
+    boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
+    void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
+    java.util.Collection clearStack() -> e
+    void addNumber(java.math.BigDecimal) -> b
+    void addNumbers(java.math.BigDecimal[]) -> a
+    void addNumbers(java.util.Collection) -> a
+    java.math.BigDecimal popLastNumber() -> f
+    java.math.BigDecimal getLastNumber() -> g
+    java.math.BigDecimal[] popNumbers(int) -> b
+    boolean addEditableToStack(net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag) -> a
+    void clickedUndo() -> a
+    void clickedRedo() -> b
+    boolean isEditableNumberInStack() -> c
+    void clickedDigit(int,boolean) -> a
+    void clickedDecimal(boolean) -> a
+    void clickedScientificNotation(boolean) -> b
+    void clickedMinus(boolean) -> c
+    void clickedDelete(boolean) -> d
+    void clickedEnter(boolean) -> e
+    void clickedPopNumber(boolean) -> f
+    void clickedClear(boolean) -> g
+    void clickedStackNumber(boolean,java.math.BigDecimal) -> a
+    void clickedSwap(boolean,int,int) -> a
+    void clickedOperation(net.project104.civyshkrpncalc.MainActivity$Operation) -> a
+    java.math.BigDecimal getHardcodedCosine(java.math.BigDecimal,net.project104.civyshkrpncalc.MainActivity$AngleMode) -> a
+    java.math.BigDecimal getHardcodedTangent(java.math.BigDecimal,net.project104.civyshkrpncalc.MainActivity$AngleMode) -> b
+    boolean doubleIsInfinite(java.math.BigDecimal) -> c
+    java.math.BigInteger factorial(java.math.BigInteger) -> a
+    java.math.BigDecimal toDegrees(java.math.BigDecimal) -> d
+    java.math.BigDecimal toRadians(java.math.BigDecimal) -> e
+    java.math.MathContext getGoodContext(java.math.BigDecimal) -> f
+    java.math.MathContext getGoodContext(java.math.BigDecimal[]) -> b
+    java.lang.String toString(java.math.BigDecimal) -> a
+    java.lang.String localizeDecimalSeparator(java.lang.String) -> a
+    void switchAngleMode() -> h
+    void showAngleMode() -> d
+    void showError(java.lang.String) -> b
+    java.lang.String removeZeros(java.lang.String,boolean,java.lang.String) -> a
+    boolean lastCharIs(java.lang.String,char) -> a
+    java.util.ArrayList buildStringArrayListNumbers(java.util.List) -> a
+    void onScrollChanged() -> onScrollChanged
+    void updateArrowVisibility() -> i
+    java.math.BigDecimal[] access$100(net.project104.civyshkrpncalc.MainActivity,int) -> a
+    void access$200(net.project104.civyshkrpncalc.MainActivity,java.util.Collection) -> a
+    net.project104.civyshkrpncalc.MainActivity$Operation access$300(net.project104.civyshkrpncalc.MainActivity,int) -> b
+    void access$400(net.project104.civyshkrpncalc.MainActivity) -> a
+    void access$500(net.project104.civyshkrpncalc.MainActivity) -> b
+    void <clinit>() -> <clinit>
+net.project104.civyshkrpncalc.MainActivity$1 -> net.project104.civyshkrpncalc.MainActivity$1:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void onChanged() -> onChanged
+net.project104.civyshkrpncalc.MainActivity$10 -> net.project104.civyshkrpncalc.MainActivity$2:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$11 -> net.project104.civyshkrpncalc.MainActivity$3:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$12 -> net.project104.civyshkrpncalc.MainActivity$4:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$13 -> net.project104.civyshkrpncalc.MainActivity$5:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$14 -> net.project104.civyshkrpncalc.MainActivity$6:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$15 -> net.project104.civyshkrpncalc.MainActivity$7:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$16 -> net.project104.civyshkrpncalc.MainActivity$8:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$17 -> net.project104.civyshkrpncalc.MainActivity$9:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$18 -> net.project104.civyshkrpncalc.MainActivity$10:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+net.project104.civyshkrpncalc.MainActivity$19 -> net.project104.civyshkrpncalc.MainActivity$11:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void run() -> run
+net.project104.civyshkrpncalc.MainActivity$2 -> net.project104.civyshkrpncalc.MainActivity$12:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$20 -> net.project104.civyshkrpncalc.MainActivity$13:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void run() -> run
+net.project104.civyshkrpncalc.MainActivity$21 -> net.project104.civyshkrpncalc.MainActivity$14:
+    int[] $SwitchMap$net$project104$civyshkrpncalc$MainActivity$Operation -> a
+    void <clinit>() -> <clinit>
+net.project104.civyshkrpncalc.MainActivity$3 -> net.project104.civyshkrpncalc.MainActivity$15:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$4 -> net.project104.civyshkrpncalc.MainActivity$16:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$5 -> net.project104.civyshkrpncalc.MainActivity$17:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$6 -> net.project104.civyshkrpncalc.MainActivity$18:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$7 -> net.project104.civyshkrpncalc.MainActivity$19:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$8 -> net.project104.civyshkrpncalc.MainActivity$20:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$9 -> net.project104.civyshkrpncalc.MainActivity$21:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$AngleMode -> net.project104.civyshkrpncalc.MainActivity$a:
+    net.project104.civyshkrpncalc.MainActivity$AngleMode DEGREE -> a
+    net.project104.civyshkrpncalc.MainActivity$AngleMode RADIAN -> b
+    net.project104.civyshkrpncalc.MainActivity$AngleMode[] $VALUES -> c
+    net.project104.civyshkrpncalc.MainActivity$AngleMode[] values() -> values
+    net.project104.civyshkrpncalc.MainActivity$AngleMode valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    void <clinit>() -> <clinit>
+net.project104.civyshkrpncalc.MainActivity$BackgroundColorSetter -> net.project104.civyshkrpncalc.MainActivity$b:
+    android.view.View view -> a
+    void <init>(android.view.View) -> <init>
+    void onAnimationUpdate(android.animation.ValueAnimator) -> onAnimationUpdate
+net.project104.civyshkrpncalc.MainActivity$Change -> net.project104.civyshkrpncalc.MainActivity$c:
+    void undo() -> a
+    void redo() -> b
+net.project104.civyshkrpncalc.MainActivity$HistorySaver -> net.project104.civyshkrpncalc.MainActivity$d:
+    java.lang.ref.WeakReference activity -> a
+    java.util.LinkedList changes -> c
+    int currentChangeIndex -> b
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void insertChange(int,net.project104.civyshkrpncalc.MainActivity$Change) -> a
+    net.project104.civyshkrpncalc.MainActivity$Change getPrevious() -> d
+    void saveSimpleChange(net.project104.civyshkrpncalc.MainActivity$SimpleChange) -> a
+    void saveSwapChange(net.project104.civyshkrpncalc.MainActivity$SwapChange) -> a
+    void goBack() -> a
+    void goForward() -> b
+    net.project104.civyshkrpncalc.MainActivity getActivity() -> c
+    void setActivity(net.project104.civyshkrpncalc.MainActivity) -> a
+net.project104.civyshkrpncalc.MainActivity$HorizontalViewScroller -> net.project104.civyshkrpncalc.MainActivity$e:
+    android.widget.HorizontalScrollView view -> a
+    void <init>(android.widget.HorizontalScrollView) -> <init>
+    void run() -> run
+net.project104.civyshkrpncalc.MainActivity$ListViewScroller -> net.project104.civyshkrpncalc.MainActivity$f:
+    android.widget.ListView view -> a
+    net.project104.civyshkrpncalc.MainActivity this$0 -> b
+    void <init>(net.project104.civyshkrpncalc.MainActivity,android.widget.ListView) -> <init>
+    void run() -> run
+net.project104.civyshkrpncalc.MainActivity$MyOnClickListener -> net.project104.civyshkrpncalc.MainActivity$g:
+    net.project104.civyshkrpncalc.MainActivity this$0 -> b
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void onClick(android.view.View) -> onClick
+    void myOnClick(android.view.View) -> a
+net.project104.civyshkrpncalc.MainActivity$Operation -> net.project104.civyshkrpncalc.MainActivity$h:
+    net.project104.civyshkrpncalc.MainActivity$Operation ADDITION -> a
+    net.project104.civyshkrpncalc.MainActivity$Operation SUBTRACTION -> b
+    net.project104.civyshkrpncalc.MainActivity$Operation MULTIPLICATION -> c
+    net.project104.civyshkrpncalc.MainActivity$Operation DIVISION -> d
+    net.project104.civyshkrpncalc.MainActivity$Operation SQUARE -> e
+    net.project104.civyshkrpncalc.MainActivity$Operation SQUAREROOT -> f
+    net.project104.civyshkrpncalc.MainActivity$Operation EXPONENTIATION -> g
+    net.project104.civyshkrpncalc.MainActivity$Operation ROOTYX -> h
+    net.project104.civyshkrpncalc.MainActivity$Operation NEGATIVE -> i
+    net.project104.civyshkrpncalc.MainActivity$Operation INVERSION -> j
+    net.project104.civyshkrpncalc.MainActivity$Operation LOG10 -> k
+    net.project104.civyshkrpncalc.MainActivity$Operation LOGYX -> l
+    net.project104.civyshkrpncalc.MainActivity$Operation LOGN -> m
+    net.project104.civyshkrpncalc.MainActivity$Operation EXPONENTIAL -> n
+    net.project104.civyshkrpncalc.MainActivity$Operation FACTORIAL -> o
+    net.project104.civyshkrpncalc.MainActivity$Operation SINE -> p
+    net.project104.civyshkrpncalc.MainActivity$Operation COSINE -> q
+    net.project104.civyshkrpncalc.MainActivity$Operation TANGENT -> r
+    net.project104.civyshkrpncalc.MainActivity$Operation ARCSINE -> s
+    net.project104.civyshkrpncalc.MainActivity$Operation ARCCOSINE -> t
+    net.project104.civyshkrpncalc.MainActivity$Operation ARCTANGENT -> u
+    net.project104.civyshkrpncalc.MainActivity$Operation SINE_H -> v
+    net.project104.civyshkrpncalc.MainActivity$Operation COSINE_H -> w
+    net.project104.civyshkrpncalc.MainActivity$Operation TANGENT_H -> x
+    net.project104.civyshkrpncalc.MainActivity$Operation DEGTORAD -> y
+    net.project104.civyshkrpncalc.MainActivity$Operation RADTODEG -> z
+    net.project104.civyshkrpncalc.MainActivity$Operation FLOOR -> A
+    net.project104.civyshkrpncalc.MainActivity$Operation ROUND -> B
+    net.project104.civyshkrpncalc.MainActivity$Operation CEIL -> C
+    net.project104.civyshkrpncalc.MainActivity$Operation SUMMATION -> D
+    net.project104.civyshkrpncalc.MainActivity$Operation SUMMATION_N -> E
+    net.project104.civyshkrpncalc.MainActivity$Operation MEAN -> F
+    net.project104.civyshkrpncalc.MainActivity$Operation MEAN_N -> G
+    net.project104.civyshkrpncalc.MainActivity$Operation CONSTANTPI -> H
+    net.project104.civyshkrpncalc.MainActivity$Operation CONSTANTEULER -> I
+    net.project104.civyshkrpncalc.MainActivity$Operation CONSTANTPHI -> J
+    net.project104.civyshkrpncalc.MainActivity$Operation RANDOM -> K
+    net.project104.civyshkrpncalc.MainActivity$Operation CIRCLE_SURFACE -> L
+    net.project104.civyshkrpncalc.MainActivity$Operation TRIANGLE_SURFACE -> M
+    net.project104.civyshkrpncalc.MainActivity$Operation HYPOTENUSE_PYTHAGORAS -> N
+    net.project104.civyshkrpncalc.MainActivity$Operation LEG_PYTHAGORAS -> O
+    net.project104.civyshkrpncalc.MainActivity$Operation QUARATIC_EQUATION -> P
+    net.project104.civyshkrpncalc.MainActivity$Operation[] $VALUES -> Q
+    net.project104.civyshkrpncalc.MainActivity$Operation[] values() -> values
+    net.project104.civyshkrpncalc.MainActivity$Operation valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    void <clinit>() -> <clinit>
+net.project104.civyshkrpncalc.MainActivity$OperationData -> net.project104.civyshkrpncalc.MainActivity$i:
+    int arity -> a
+    java.lang.Integer[] btnIds -> b
+    net.project104.civyshkrpncalc.MainActivity this$0 -> c
+    void <init>(net.project104.civyshkrpncalc.MainActivity,int,java.lang.Integer[]) -> <init>
+net.project104.civyshkrpncalc.MainActivity$SimpleChange -> net.project104.civyshkrpncalc.MainActivity$j:
+    java.util.Deque redoNumbers -> a
+    java.util.Deque undoNumbers -> b
+    int redoNumbersSize -> c
+    java.lang.String redoText -> d
+    java.lang.String undoText -> e
+    net.project104.civyshkrpncalc.MainActivity$HistorySaver saver -> f
+    boolean canMerge -> g
+    java.lang.String tag -> h
+    void <init>(net.project104.civyshkrpncalc.MainActivity$HistorySaver,java.lang.String) -> <init>
+    void <init>(net.project104.civyshkrpncalc.MainActivity$HistorySaver,java.lang.String,boolean) -> <init>
+    void addOld(java.math.BigDecimal) -> a
+    void undo() -> a
+    void redo() -> b
+    java.lang.String toString() -> toString
+    net.project104.civyshkrpncalc.MainActivity$SimpleChange merge(net.project104.civyshkrpncalc.MainActivity$SimpleChange) -> a
+net.project104.civyshkrpncalc.MainActivity$StackAnimator -> net.project104.civyshkrpncalc.MainActivity$k:
+    java.util.Set toAnimateViews -> a
+    android.animation.ValueAnimator itemBackgroundAnimator -> b
+    net.project104.civyshkrpncalc.MainActivity this$0 -> c
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void animate(int) -> a
+    void onGlobalLayout() -> onGlobalLayout
+net.project104.civyshkrpncalc.MainActivity$SwapChange -> net.project104.civyshkrpncalc.MainActivity$l:
+    int startPosition -> a
+    int endPosition -> b
+    net.project104.civyshkrpncalc.MainActivity$HistorySaver saver -> c
+    java.lang.String undoText -> d
+    void <init>(net.project104.civyshkrpncalc.MainActivity$HistorySaver,java.lang.String,int,int) -> <init>
+    void undo() -> a
+    void redo() -> b
+net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag -> net.project104.civyshkrpncalc.MainActivity$m:
+    net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag KEEP_PREVIOUS -> a
+    net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag REMOVE_PREVIOUS -> b
+    net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag[] $VALUES -> c
+    net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag[] values() -> values
+    net.project104.civyshkrpncalc.MainActivity$UpdateStackFlag valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    void <clinit>() -> <clinit>
+net.project104.civyshkrpncalc.MainActivity$ViewedString -> net.project104.civyshkrpncalc.MainActivity$n:
+    java.lang.StringBuilder text -> b
+    net.project104.civyshkrpncalc.MainActivity this$0 -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    void updateView() -> a
+    void reset() -> b
+    void append(java.lang.String) -> a
+    void pop() -> c
+    void set(java.lang.String) -> b
+    int length() -> d
+    int indexOf(java.lang.String) -> c
+    int lastIndexOf(java.lang.String) -> d
+    void deleteCharAt(int) -> a
+    char charAt(int) -> b
+    void insert(int,java.lang.String) -> a
+    java.lang.String toString() -> toString
+    void <init>(net.project104.civyshkrpncalc.MainActivity,net.project104.civyshkrpncalc.MainActivity$1) -> <init>
+net.project104.civyshkrpncalc.NumberStackDraggableAdapter -> net.project104.civyshkrpncalc.a:
+    java.lang.ref.WeakReference activityReference -> a
+    void <init>(net.project104.civyshkrpncalc.MainActivity) -> <init>
+    int getCount() -> getCount
+    java.lang.Object getItem(int) -> getItem
+    long getItemId(int) -> getItemId
+    android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    void onItemDrag(com.terlici.dragndroplist.DragNDropListView,android.view.View,int,long) -> a
+    void onItemDrop(com.terlici.dragndroplist.DragNDropListView,android.view.View,int,int,long) -> a
+    int getDragHandler() -> a
+net.project104.civyshkrpncalc.NumberStackDraggableAdapter$ViewHolder -> net.project104.civyshkrpncalc.a$a:
+    android.widget.TextView tvIndex -> a
+    android.widget.TextView tvNumber -> b
+    android.widget.ImageView ivHandler -> c
+    int position -> d
+    net.project104.civyshkrpncalc.NumberStackDraggableAdapter this$0 -> e
+    void <init>(net.project104.civyshkrpncalc.NumberStackDraggableAdapter,android.view.View) -> <init>
