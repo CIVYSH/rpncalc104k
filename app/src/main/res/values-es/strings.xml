@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">104 RPN Calc</string>
     <string name="clear">Borrar todo</string>
     <string name="decimalSeparator">,</string>
@@ -29,4 +28,8 @@
     <string name="numberTooBig">Ese número es demasiado grande</string>
     <string name="tooManyArguments">Demasiados operandos</string>
     <string name="wrongFactorial">El número debe ser entero no negativo</string>
+    <string name="rootIndexZero">El índice no puede ser cero</string>
+    <string name="complexNumber">El resultado es un número complejo</string>
+    <string name="tangentOutOfDomain">Eso da infinito</string>
+    <string name="logBaseIsOne">La base del logaritmo es 1</string>
 </resources>

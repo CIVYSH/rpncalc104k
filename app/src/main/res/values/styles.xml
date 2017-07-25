@@ -30,7 +30,7 @@
         <item name="android:background">@drawable/button_control</item>
     </style>
     <style name="buttonStyle.ControlOperations" >
-        <item name="android:background">@drawable/button_control_operations</item>
+        <item name="android:background">@drawable/button_control</item>
     </style>
     <style name="buttonStyle.Control.Enter" >
         <item name="android:background">@drawable/button_control_enter</item>

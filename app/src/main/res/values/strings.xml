@@ -29,4 +29,8 @@
     <string name="tooManyArguments">That\'s too many arguments</string>
     <string name="wrongFactorial">Number must be non-negative integer</string>
     <string name="numberTooBig">That number is too big</string>
+    <string name="rootIndexZero">Index can\'t be zero</string>
+    <string name="tangentOutOfDomain">That\'s infinite</string>
+    <string name="complexNumber">That yields a complex number</string>
+    <string name="logBaseIsOne">Log base can\'t be 1</string>
 </resources>

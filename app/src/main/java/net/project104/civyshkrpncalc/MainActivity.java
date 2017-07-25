@@ -31,11 +31,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,11 +51,13 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
@@ -60,7 +67,7 @@ import com.terlici.dragndroplist.DragNDropListView;
 import static android.view.View.FOCUS_RIGHT;
 import static android.view.View.GONE;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ViewTreeObserver.OnScrollChangedListener {
     final static String TAG = MainActivity.class.getSimpleName();
 
     final static BigDecimal BIG_PI = new BigDecimal(Math.PI);
@@ -121,6 +128,22 @@ public class MainActivity extends Activity {
         }
     };
 
+    @TargetApi(11)
+    public static class BackgroundColorSetter implements ValueAnimator.AnimatorUpdateListener {
+        View view;
+
+        public BackgroundColorSetter(View view) {
+            this.view = view;
+        }
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            view.setBackgroundColor((Integer) animation.getAnimatedValue());
+        }
+    }
+
+    private ValueAnimator errorBackgroundAnimator;
+
     LinkedList<BigDecimal> numberStack = new LinkedList<>();
 
     private class ViewedString {
@@ -128,7 +151,8 @@ public class MainActivity extends Activity {
         private StringBuilder text = new StringBuilder(NUMBER_BUILDER_INITIAL_CAPACITY);
 
         void updateView() {
-            tvEditableNumber.setText(text);
+            char separator = getString(R.string.decimalSeparator).charAt(0);
+            tvEditableNumber.setText(text.toString().replace('.', separator));
             tvEditableNumber.post(new HorizontalViewScroller(scrollEditableNumber));
             scrollEditableNumber.setVisibility(View.VISIBLE);
             scrollError.setVisibility(GONE);
@@ -141,6 +165,11 @@ public class MainActivity extends Activity {
 
         void append(String more) {
             text.append(more);
+            updateView();
+        }
+
+        void pop() {
+            text.deleteCharAt(text.length() - 1);
             updateView();
         }
 
@@ -195,11 +224,54 @@ public class MainActivity extends Activity {
     HistorySaver historySaver;
 
     DragNDropListView layoutNumbersDraggable;
+    ImageView arrowUp, arrowDown;
     HorizontalScrollView scrollEditableNumber, scrollError;
     TextView tvEditableNumber, tvError, tvAngleMode;
     ViewAnimator switcherFunctions;
 
-    NumberStackDragableAdapter numberStackDragableAdapter;
+    NumberStackDraggableAdapter numberStackDraggableAdapter;
+
+    private class StackAnimator implements ViewTreeObserver.OnGlobalLayoutListener {
+        Set<Integer> toAnimateViews = new HashSet<>();
+        ValueAnimator itemBackgroundAnimator;
+
+        StackAnimator(){
+            if (Build.VERSION.SDK_INT >= 11) {
+                toAnimateViews = new HashSet<>(0);
+                itemBackgroundAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
+                        getResources().getColor(R.color.dropped_background_color),
+                        getResources().getColor(R.color.stack_number_background));
+                itemBackgroundAnimator.setDuration(getResources().getInteger(R.integer.dropped_background_duration));
+            }
+        }
+
+        void animate(int position){
+            if (Build.VERSION.SDK_INT >= 11) {
+                toAnimateViews.add(position);
+                itemBackgroundAnimator.end();
+                itemBackgroundAnimator.removeAllUpdateListeners();
+            }
+        }
+
+        @Override
+        public void onGlobalLayout() {
+            if (Build.VERSION.SDK_INT >= 11) {
+                for(int i = 0, size = layoutNumbersDraggable.getChildCount(); i < size; i++){
+                    View view = layoutNumbersDraggable.getChildAt(i);
+                    int position = ((NumberStackDraggableAdapter.ViewHolder) view.getTag()).position;
+                    if (toAnimateViews.contains(position)) {
+                        itemBackgroundAnimator.addUpdateListener(new MainActivity.BackgroundColorSetter(view));
+                        toAnimateViews.remove(position);
+                        if (toAnimateViews.size() == 0) {
+                            itemBackgroundAnimator.start();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    StackAnimator stackAnimator;
 
     private class OperationData {
         int arity;
@@ -272,12 +344,13 @@ public class MainActivity extends Activity {
         DEGREE, RADIAN
     }
 
-    interface Change{
+    interface Change extends Serializable {
         void undo();
+
         void redo();
     }
 
-    static class SimpleChange implements Change{
+    static class SimpleChange implements Change {
         Deque<BigDecimal> redoNumbers = new LinkedList<>();//ArrayDeque from API 9
         Deque<BigDecimal> undoNumbers = new LinkedList<>();
         int redoNumbersSize = 0;
@@ -338,13 +411,13 @@ public class MainActivity extends Activity {
                 newChange.redoNumbersSize = 1;
                 newChange.undoNumbers = other.undoNumbers;
                 return newChange;
-            }else{
+            } else {
                 return null;
             }
         }
     }
 
-    static class SwapChange implements Change{
+    static class SwapChange implements Change {
         int startPosition, endPosition;
         HistorySaver saver;
         String undoText;
@@ -365,7 +438,7 @@ public class MainActivity extends Activity {
             activity.numberStack.add(startPosition, draggingNumber);
             activity.editableNumber.set(undoText);
 
-            activity.numberStackDragableAdapter.notifyDataSetChanged();
+            activity.numberStackDraggableAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -377,7 +450,7 @@ public class MainActivity extends Activity {
             activity.numberStack.add(endPosition, draggingNumber);
             activity.editableNumber.reset();
 
-            activity.numberStackDragableAdapter.notifyDataSetChanged();
+            activity.numberStackDraggableAdapter.notifyDataSetChanged();
         }
     }
 
@@ -414,11 +487,11 @@ public class MainActivity extends Activity {
 
         void saveSimpleChange(SimpleChange change) {
             Change previousChange = getPrevious();
-            if(previousChange instanceof SimpleChange){
+            if (previousChange instanceof SimpleChange) {
                 SimpleChange mergedChange = change.merge((SimpleChange) previousChange);
                 if (mergedChange != null) {
                     insertChange(currentChangeIndex, mergedChange);
-                }else {
+                } else {
                     insertChange(currentChangeIndex + 1, change);
                 }
             } else {
@@ -426,7 +499,7 @@ public class MainActivity extends Activity {
             }
         }
 
-        void saveSwapChange(SwapChange change){
+        void saveSwapChange(SwapChange change) {
             insertChange(currentChangeIndex + 1, change);
         }
 
@@ -453,9 +526,20 @@ public class MainActivity extends Activity {
         }
     }
 
-    OnClickListener clickListenerDigitButtons = new OnClickListener() {
+    abstract class MyOnClickListener implements OnClickListener {
         @Override
-        public void onClick(View view) {
+        final public void onClick(View v) {
+            if (!MainActivity.this.layoutNumbersDraggable.isDragging()) {
+                myOnClick(v);
+            }
+        }
+
+        abstract void myOnClick(View v);
+    }
+
+    MyOnClickListener clickListenerDigitButtons = new MyOnClickListener() {
+        @Override
+        public void myOnClick(View view) {
             int id = view.getId();
             for (int i = 0; i < 10; ++i) {
                 if (id == digitButtonsIds[i]) {
@@ -466,9 +550,9 @@ public class MainActivity extends Activity {
         }
     };
 
-    OnClickListener clickListenerOperations = new OnClickListener() {
+    MyOnClickListener clickListenerOperations = new MyOnClickListener() {
         @Override
-        public void onClick(View view) {
+        public void myOnClick(View view) {
             Operation operation = getOperationFromBtnId(view.getId());
             if (operation != null) {
                 clickedOperation(operation);
@@ -572,79 +656,79 @@ public class MainActivity extends Activity {
         }
 
 
-        ((ImageButton) findViewById(R.id.butUndo)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butUndo)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedUndo();
             }
         });
-        ((ImageButton) findViewById(R.id.butRedo)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butRedo)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedRedo();
             }
         });
 
-        ((Button) findViewById(R.id.butDecimal)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((Button) findViewById(R.id.butDecimal)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedDecimal(true);
             }
         });
-        ((ImageButton) findViewById(R.id.butPopNumber)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butPopNumber)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedPopNumber(true);
             }
         });
-        ((ImageButton) findViewById(R.id.butClear)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butClear)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedClear(true);
             }
         });
-        ((ImageButton) findViewById(R.id.butDelete)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butDelete)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedDelete(true);
             }
         });
-        ((ImageButton) findViewById(R.id.butEnterNumber)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butEnterNumber)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedEnter(true);
             }
         });
-        ((ImageButton) findViewById(R.id.scientificNotation)).setOnClickListener(new OnClickListener() {
+        ((ImageButton) findViewById(R.id.scientificNotation)).setOnClickListener(new MyOnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void myOnClick(View view) {
                 clickedScientificNotation(true);
             }
         });
-        ((Button) findViewById(R.id.minus)).setOnClickListener(new OnClickListener() {
+        ((Button) findViewById(R.id.minus)).setOnClickListener(new MyOnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void myOnClick(View view) {
                 clickedMinus(true);
             }
         });
-        ((ImageButton) findViewById(R.id.butDegRad)).setOnClickListener(new OnClickListener() {
+        ((ImageButton) findViewById(R.id.butDegRad)).setOnClickListener(new MyOnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void myOnClick(View view) {
                 switchAngleMode();
             }
         });
 
 
-        ((ImageButton) findViewById(R.id.butFunctionsMore)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butFunctionsMore)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 switcherFunctions.showNext();
             }
         });
-        ((ImageButton) findViewById(R.id.butFunctionsLess)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butFunctionsLess)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 switcherFunctions.showNext();
             }
         });
-        ((ImageButton) findViewById(R.id.butSwitch)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butSwitch)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedSwap(true, -1, -1);
             }
         });
-        ((ImageButton) findViewById(R.id.butSwitch2)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
+        ((ImageButton) findViewById(R.id.butSwitch2)).setOnClickListener(new MyOnClickListener() {
+            public void myOnClick(View view) {
                 clickedSwap(true, -1, -1);
             }
         });
@@ -661,17 +745,39 @@ public class MainActivity extends Activity {
             ((Button) findViewById(digitButtonsIds[i])).setOnClickListener(clickListenerDigitButtons);
         }
 
-        numberStackDragableAdapter = new NumberStackDragableAdapter(this);
-        numberStackDragableAdapter.registerDataSetObserver(numberStackObserver);
-        layoutNumbersDraggable.setDragNDropAdapter(numberStackDragableAdapter);
+        numberStackDraggableAdapter = new NumberStackDraggableAdapter(this);
+        numberStackDraggableAdapter.registerDataSetObserver(numberStackObserver);
+        layoutNumbersDraggable.setDragNDropAdapter(numberStackDraggableAdapter);
 
         layoutNumbersDraggable.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapter, View v, int position, long itemId) {
                 BigDecimal number = (BigDecimal) adapter.getItemAtPosition(position);
                 MainActivity.this.clickedStackNumber(true, number);
+                stackAnimator.animate(position);
+                stackAnimator.animate(numberStack.size() - 1);
             }
         });
+
+        arrowUp = (ImageView) findViewById(R.id.arrow_up);
+        arrowDown = (ImageView) findViewById(R.id.arrow_down);
+        layoutNumbersDraggable.getViewTreeObserver().addOnScrollChangedListener(this);
+        stackAnimator = new StackAnimator();
+        layoutNumbersDraggable.getViewTreeObserver().addOnGlobalLayoutListener(stackAnimator);
+        layoutNumbersDraggable.post(new Runnable() {
+            @Override
+            public void run() {
+                updateArrowVisibility();
+            }
+        });
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            errorBackgroundAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
+                    getResources().getColor(R.color.new_error_background_color),
+                    getResources().getColor(R.color.editable_background_color));
+            errorBackgroundAnimator.setDuration(getResources().getInteger(R.integer.dropped_background_duration));
+            errorBackgroundAnimator.addUpdateListener(new BackgroundColorSetter(findViewById(R.id.parentDigits)));
+        }
 
 //        if (mUsingViewAnimator) {
 //            Button b1 = (Button) findViewById(R.id.but1);
@@ -776,13 +882,13 @@ public class MainActivity extends Activity {
     private Collection<BigDecimal> clearStack() {
         Collection<BigDecimal> cleared = new ArrayList<>(numberStack);
         numberStack.clear();
-        numberStackDragableAdapter.notifyDataSetChanged();
+        numberStackDraggableAdapter.notifyDataSetChanged();
         return cleared;
     }
 
     private void addNumber(BigDecimal number) {
         numberStack.add(number);
-        numberStackDragableAdapter.notifyDataSetChanged();
+        numberStackDraggableAdapter.notifyDataSetChanged();
     }
 
     private void addNumbers(BigDecimal[] numbers) {
@@ -791,13 +897,13 @@ public class MainActivity extends Activity {
 
     private void addNumbers(Collection<BigDecimal> numbers) {
         numberStack.addAll(numbers);
-        numberStackDragableAdapter.notifyDataSetChanged();
+        numberStackDraggableAdapter.notifyDataSetChanged();
     }
 
     private BigDecimal popLastNumber() {
         try {
             BigDecimal number = numberStack.removeLast();
-            numberStackDragableAdapter.notifyDataSetChanged();
+            numberStackDraggableAdapter.notifyDataSetChanged();
             return number;
         }catch(NoSuchElementException e) {
             return null;
@@ -817,7 +923,7 @@ public class MainActivity extends Activity {
         for (int i = amount - 1; i >= 0; i--) {
             numbers[i] = numberStack.removeLast();
         }
-        numberStackDragableAdapter.notifyDataSetChanged();
+        numberStackDraggableAdapter.notifyDataSetChanged();
         return numbers;
     }
 
@@ -828,9 +934,10 @@ public class MainActivity extends Activity {
      *             inserting the new one
      * @return true if a new number has been built and inserted in the stack
      */
-    boolean addEditableToStack(UpdateStackFlag flag) {
+    boolean addEditableToStack(UpdateStackFlag flag) throws NumberFormatException {
+        BigDecimal removed = null;
         if (flag == UpdateStackFlag.REMOVE_PREVIOUS) {
-            numberStack.removeLast();
+            removed = numberStack.removeLast();
         }
 
         if (editableNumber.length() > 0) {
@@ -842,12 +949,21 @@ public class MainActivity extends Activity {
             }
 
             if (candidateString.length() > 0) {
-                BigDecimal newNumber = new BigDecimal(candidateString);
-                numberStack.add(newNumber);
-                numberStackDragableAdapter.notifyDataSetChanged();
-                return true;
+                try {
+                    BigDecimal newNumber = new BigDecimal(candidateString);
+                    numberStack.add(newNumber);
+                    numberStackDraggableAdapter.notifyDataSetChanged();
+                    return true;
+                }catch(NumberFormatException e) {
+                    if (removed != null) {
+                        numberStack.add(removed);
+                        numberStackDraggableAdapter.notifyDataSetChanged();
+                    }
+                    throw e;
+                }
             }
         }
+        numberStackDraggableAdapter.notifyDataSetChanged();
         return false;
     }
 
@@ -874,12 +990,16 @@ public class MainActivity extends Activity {
         }
         editableNumber.append(String.valueOf(digit));
 
-        boolean addedNumber = addEditableToStack(removePrevious ? UpdateStackFlag.REMOVE_PREVIOUS : UpdateStackFlag.KEEP_PREVIOUS);
-        if (save) {
-            if (addedNumber) {
-                simpleChange.redoNumbersSize = 1;
+        try {
+            boolean addedNumber = addEditableToStack(removePrevious ? UpdateStackFlag.REMOVE_PREVIOUS : UpdateStackFlag.KEEP_PREVIOUS);
+            if (save) {
+                if (addedNumber) {
+                    simpleChange.redoNumbersSize = 1;
+                }
+                historySaver.saveSimpleChange(simpleChange);
             }
-            historySaver.saveSimpleChange(simpleChange);
+        }catch(NumberFormatException e) {
+            editableNumber.pop();
         }
     }
 
@@ -985,11 +1105,17 @@ public class MainActivity extends Activity {
             int scientificPosition = editableNumber.indexOf("E");
             if (scientificPosition >= 0) {
                 int minusPosition = editableNumber.lastIndexOf("-");
+                int plusPosition = editableNumber.lastIndexOf("+");
                 if (minusPosition == scientificPosition + 1) {
                     //"1E-5" -> "1E5"
                     editableNumber.deleteCharAt(minusPosition);
-                } else {
-                    //"1E5" -> //"1E-5"
+                } else if (plusPosition == scientificPosition + 1) {
+                    //"1E+5" -> "1E-5"
+                    editableNumber.deleteCharAt(scientificPosition + 1);
+                    editableNumber.insert(scientificPosition + 1, "-");
+
+                }else{
+                    //"1E5" -> "1E-5"
                     editableNumber.insert(scientificPosition + 1, "-");
                 }
             } else {
@@ -1028,11 +1154,16 @@ public class MainActivity extends Activity {
             }
             UpdateStackFlag flagRemove = removePrevious ? UpdateStackFlag.REMOVE_PREVIOUS : UpdateStackFlag.KEEP_PREVIOUS;
             char deletingChar = editableNumber.charAt(editableNumber.length() - 1);
-            editableNumber.deleteCharAt(editableNumber.length() - 1);
+            editableNumber.pop();
             if (deletingChar == 'E' && deleteCharBeforeScientificNotation
                     || deletingChar == '.' && deleteCharBeforeDecimalSeparator) {
-                editableNumber.deleteCharAt(editableNumber.length() - 1);
+                editableNumber.pop();
             }
+
+            if (lastCharIs(editableNumber.toString(), '+')) {
+                editableNumber.pop();
+            }
+
             boolean addedNumber = addEditableToStack(flagRemove);
             if (save) {
                 if (addedNumber) {
@@ -1052,6 +1183,8 @@ public class MainActivity extends Activity {
             if (numberStack.size() != 0) {
                 BigDecimal number = getLastNumber();
                 addNumber(number);
+                stackAnimator.animate(numberStack.size() - 1);
+                stackAnimator.animate(numberStack.size() - 2);
                 if (save) {
                     simpleChange.redoNumbersSize = 1;
                 }
@@ -1133,7 +1266,10 @@ public class MainActivity extends Activity {
         if (save) {
             historySaver.saveSwapChange(change);
         }
-        numberStackDragableAdapter.notifyDataSetChanged();
+        stackAnimator.animate(startPosition);
+        stackAnimator.animate(endPosition);
+
+        numberStackDraggableAdapter.notifyDataSetChanged();
     }
 
     void clickedOperation(Operation operation) {
@@ -1141,376 +1277,504 @@ public class MainActivity extends Activity {
 
         final int arity = operationsData.get(operation).arity;
         int numberOfArguments;
+        int availableArguments = numberStack.size();
+        boolean enoughArguments;
         boolean editableInStack = isEditableNumberInStack();
         editableNumber.reset();
-        if (numberStack.size() < ((arity == ARITY_ALL) ? 1 : arity)) {
-            showError(getResources().getString(R.string.notEnoughArguments));
-        } else {
-            if (arity == ARITY_ALL) {
-                numberOfArguments = numberStack.size();
-            } else if (arity == ARITY_ZERO_ONE) {
-                if (editableInStack) {
-                    numberOfArguments = 1;
-                } else {
-                    numberOfArguments = 0;
-                }
-            } else if (arity == ARITY_N) {
+
+        if (arity == ARITY_ALL) {
+            numberOfArguments = availableArguments;
+            enoughArguments = availableArguments != 0;
+        } else if (arity == ARITY_ZERO_ONE) {
+            if (editableInStack) {
                 numberOfArguments = 1;
             } else {
-                numberOfArguments = arity;
+                numberOfArguments = 0;
             }
+            enoughArguments = availableArguments >= numberOfArguments;
+        } else if (arity == ARITY_N) {
+            numberOfArguments = 1;
+            enoughArguments = availableArguments >= numberOfArguments;
+        } else {
+            numberOfArguments = arity;
+            enoughArguments = availableArguments >= numberOfArguments;
+        }
+
+        if (!enoughArguments) {
+            showError(getResources().getString(R.string.notEnoughArguments));
+        } else {
             BigDecimal[] operands = popNumbers(numberOfArguments);
 
             List<BigDecimal> results = new ArrayList<>(1);
             String error = null;
-            if (arity == ARITY_ALL) {
-                BigDecimal result;
-                switch (operation) {
-                    case SUMMATION:
-                        result = operands[0];
-                        for (int i = 1; i < numberOfArguments; ++i) {
-                            result = result.add(operands[i]);
-                        }
-                        results.add(result);
-                        break;
-                    case MEAN:
-                        result = operands[0];
-                        int precision = 1;
-                        for (int i = 1; i < numberOfArguments; ++i) {
-                            precision = Math.max(precision, operands[i].precision());
-                            result = result.add(operands[i]);
-                        }
-                        precision = Math.max(precision, GOOD_PRECISION);
-                        MathContext mathContext = new MathContext(precision, ROUNDING_MODE);
-                        result = result.divide(new BigDecimal(numberOfArguments), mathContext);
-                        results.add(result);
-                        break;
-                    default:
-                        error = getResources().getString(R.string.operationNotImplemented);
-                        break;
-                }
-            } else if (arity == ARITY_ZERO_ONE) {
-                BigDecimal result = (operation == Operation.CONSTANTPI ? BIG_PI : (operation == Operation.CONSTANTEULER ? BIG_EULER : BIG_PHI).round(DEFAULT_MATH_CONTEXT));
-                if (operands.length == 1) {
-                    result = result.multiply(operands[0], getGoodContext(operands[0]));
-                }
-                results.add(result);
-            } else if (arity == ARITY_N) {
-                int userNumberOperands;
-                try {
-                    long nLong = operands[0].longValueExact();
-                    if (nLong <= Integer.MAX_VALUE) {
-                        userNumberOperands = (int) nLong;
-
-                        if (numberStack.size() < userNumberOperands) {
-                            error = getResources().getString(R.string.notEnoughArguments);
-                        } else {
-                            //pop N more operands
-                            Collection<BigDecimal> fullOperands = new ArrayList<>(userNumberOperands + 1);
-                            fullOperands.add(operands[0]);
-                            fullOperands.addAll(Arrays.asList(popNumbers(userNumberOperands)));
-                            operands = fullOperands.toArray(new BigDecimal[userNumberOperands + 1]);
-                            BigDecimal result = BigDecimal.ZERO;
-                            switch (operation) {
-                                case SUMMATION_N:
-                                    for (int i = 1; i <= userNumberOperands; i++) {
-                                        result = result.add(operands[i]);
-                                    }
-                                    break;
-                                case MEAN_N:
-                                    for (int i = 1; i <= userNumberOperands; i++) {
-                                        result = result.add(operands[i]);
-                                    }
-                                    result = result.divide(new BigDecimal(userNumberOperands), getGoodContext(operands));
-                                    break;
-                                default:
-                                    error = getResources().getString(R.string.operationNotImplemented);
-                                    break;
+            try {
+                if (arity == ARITY_ALL) {
+                    BigDecimal result;
+                    switch (operation) {
+                        case SUMMATION:
+                            result = operands[0];
+                            for (int i = 1; i < numberOfArguments; ++i) {
+                                result = result.add(operands[i]);
                             }
                             results.add(result);
-                        }
-                    } else {
-                        error = getResources().getString(R.string.tooManyArguments);
+                            break;
+                        case MEAN:
+                            result = operands[0];
+                            int precision = 1;
+                            for (int i = 1; i < numberOfArguments; ++i) {
+                                precision = Math.max(precision, operands[i].precision());
+                                result = result.add(operands[i]);
+                            }
+                            precision = Math.max(precision, GOOD_PRECISION);
+                            MathContext mathContext = new MathContext(precision, ROUNDING_MODE);
+                            result = result.divide(new BigDecimal(numberOfArguments), mathContext);
+                            results.add(result);
+                            break;
+                        default:
+                            error = getResources().getString(R.string.operationNotImplemented);
+                            break;
                     }
-                }catch(ArithmeticException e) {
-                    error = getResources().getString(R.string.nIsNotInteger);
-                }
-            } else if (arity == 0) {
-                BigDecimal result;
-                switch (operation) {
-                    case RANDOM:
-                        result = new BigDecimal(Math.random());
-                        results.add(result);
-                        break;
-                    default:
-                        error = getResources().getString(R.string.operationNotImplemented);
-                        break;
-                }
-            } else if (arity == 1) {
-                BigDecimal result;
-                BigDecimal radians;
-                switch (operation) {
-                    case INVERSION:
-                        if (operands[0].compareTo(BigDecimal.ZERO) == 0) {
-                            error = getResources().getString(R.string.divisionByZero);
-                        } else {
-                            result = BigDecimal.ONE.divide(operands[0], DEFAULT_MATH_CONTEXT);
-                            results.add(result);
-                        }
-                        break;
-                    case SQUARE:
-                        result = operands[0].pow(2, getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case NEGATIVE:
-                        result = operands[0].negate();
-                        results.add(result);
-                        break;
-                    case SQUAREROOT:
-                        if (operands[0].compareTo(BigDecimal.ZERO) < 0) {
-                            error = getResources().getString(R.string.negativeSquareRoot);
-                        } else {
-                            result = new BigDecimal(Math.sqrt(operands[0].doubleValue()), getGoodContext(operands[0]));
-                            results.add(result);
-                        }
-                        break;
-                    case SINE:
-                        radians = operands[0];
-                        if (angleMode == AngleMode.DEGREE) {
-                            radians = toRadians(operands[0]);
-                        }
-                        result = new BigDecimal(Math.sin(radians.doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case COSINE:
-                        radians = operands[0];
-                        if (angleMode == AngleMode.DEGREE) {
-                            radians = toRadians(operands[0]);
-                        }
-                        result = new BigDecimal(Math.cos(radians.doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case TANGENT:
-                        radians = operands[0];
-                        if (angleMode == AngleMode.DEGREE) {
-                            radians = toRadians(operands[0]);
-                        }
-                        result = new BigDecimal(Math.tan(radians.doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case ARCSINE:
-                        if (operands[0].compareTo(BigDecimal.ONE.negate()) < 0
-                                || operands[0].compareTo(BigDecimal.ONE) > 0) {
-                            error = getResources().getString(R.string.arcsineOutOfRange);
-                        } else {
-                            result = new BigDecimal(Math.asin(operands[0].doubleValue()), getGoodContext(operands[0]));
-                            if (angleMode == AngleMode.DEGREE) {
-                                result = toDegrees(result);
-                            }
-                            results.add(result);
-                        }
-                        break;
-                    case ARCCOSINE:
-                        if (operands[0].compareTo(new BigDecimal("-1.0")) < 0
-                                || operands[0].compareTo(new BigDecimal("1.0")) > 0) {
-                            error = getResources().getString(R.string.arccosineOutOfRange);
-                        } else {
-                            result = new BigDecimal(Math.acos(operands[0].doubleValue()), getGoodContext(operands[0]));
-                            if (angleMode == AngleMode.DEGREE) {
-                                result = toDegrees(result);
-                            }
-                            results.add(result);
-                        }
-                        break;
-                    case ARCTANGENT:
-                        result = new BigDecimal(Math.atan(operands[0].doubleValue()), getGoodContext(operands[0]));
-                        if (angleMode == AngleMode.DEGREE) {
-                            result = toDegrees(result);
-                            results.add(result);
-                        }
-                        break;
-                    case SINE_H:
-                        result = new BigDecimal(Math.sinh(operands[0].doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case COSINE_H:
-                        result = new BigDecimal(Math.cosh(operands[0].doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case TANGENT_H:
-                        result = new BigDecimal(Math.tanh(operands[0].doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case LOG10:
-                        if (operands[0].compareTo(BigDecimal.ZERO) <= 0) {
-                            error = getResources().getString(R.string.logOutOfRange);
-                        } else {
-                            result = new BigDecimal(Math.log10(operands[0].doubleValue()), getGoodContext(operands[0]));
-                            results.add(result);
-                        }
-                        break;
-                    case LOGN:
-                        if (operands[0].compareTo(BigDecimal.ZERO) <= 0) {
-                            error = getResources().getString(R.string.logOutOfRange);
-                        } else {
-                            result = new BigDecimal(Math.log(operands[0].doubleValue()), getGoodContext(operands[0]));
-                            results.add(result);
-                        }
-                        break;
-                    case EXPONENTIAL:
-                        result = new BigDecimal(Math.exp(operands[0].doubleValue()), getGoodContext(operands[0]));
-                        results.add(result);
-                        break;
-                    case FACTORIAL:
-                        try {
-                            if (operands[0].compareTo(new BigDecimal(1000)) > 0) {
-                                error = getResources().getString(R.string.numberTooBig);
+                } else if (arity == ARITY_ZERO_ONE) {
+                    BigDecimal result = (operation == Operation.CONSTANTPI ? BIG_PI : (operation == Operation.CONSTANTEULER ? BIG_EULER : BIG_PHI)).round(DEFAULT_MATH_CONTEXT);
+                    if (operands.length == 1) {
+                        result = result.multiply(operands[0], getGoodContext(operands[0]));
+                    }
+                    results.add(result);
+                } else if (arity == ARITY_N) {
+                    int userNumberOperands;
+                    try {
+                        long nLong = operands[0].longValueExact();
+                        if (nLong <= Integer.MAX_VALUE) {
+                            userNumberOperands = (int) nLong;
+
+                            if (numberStack.size() < userNumberOperands) {
+                                error = getResources().getString(R.string.notEnoughArguments);
                             } else {
-                                BigInteger operand = operands[0].toBigIntegerExact();
-                                result = new BigDecimal(factorial(operand));
+                                //pop N more operands
+                                Collection<BigDecimal> fullOperands = new ArrayList<>(userNumberOperands + 1);
+                                fullOperands.add(operands[0]);
+                                fullOperands.addAll(Arrays.asList(popNumbers(userNumberOperands)));
+                                operands = fullOperands.toArray(new BigDecimal[userNumberOperands + 1]);
+                                BigDecimal result = BigDecimal.ZERO;
+                                switch (operation) {
+                                    case SUMMATION_N:
+                                        for (int i = 1; i <= userNumberOperands; i++) {
+                                            result = result.add(operands[i]);
+                                        }
+                                        break;
+                                    case MEAN_N:
+                                        for (int i = 1; i <= userNumberOperands; i++) {
+                                            result = result.add(operands[i]);
+                                        }
+                                        result = result.divide(new BigDecimal(userNumberOperands), getGoodContext(operands));
+                                        break;
+                                    default:
+                                        error = getResources().getString(R.string.operationNotImplemented);
+                                        break;
+                                }
                                 results.add(result);
                             }
-                        }catch(ArithmeticException e) {
-                            error = getResources().getString(R.string.wrongFactorial);
-                        }
-                        break;
-                    case DEGTORAD:
-                        result = toRadians(operands[0]);
-                        results.add(result);
-                        break;
-                    case RADTODEG:
-                        result = toDegrees(operands[0]);
-                        results.add(result);
-                        break;
-                    case FLOOR:
-                        results.add(operands[0].setScale(0, RoundingMode.FLOOR));
-                        break;
-                    case ROUND:
-                        results.add(operands[0].setScale(0, RoundingMode.HALF_UP));
-                        break;
-                    case CEIL:
-                        results.add(operands[0].setScale(0, RoundingMode.CEILING));
-                        break;
-                    case CIRCLE_SURFACE:
-                        if (operands[0].compareTo(BigDecimal.ZERO) < 0) {
-                            error = getResources().getString(R.string.negativeRadius);
                         } else {
-                            result = operands[0].pow(2).multiply(BIG_PI, getGoodContext(operands[0]));
+                            error = getResources().getString(R.string.tooManyArguments);
+                        }
+                    }catch(ArithmeticException e) {
+                        error = getResources().getString(R.string.nIsNotInteger);
+                    }
+                } else if (arity == 0) {
+                    BigDecimal result;
+                    switch (operation) {
+                        case RANDOM:
+                            result = new BigDecimal(Math.random());
                             results.add(result);
-                        }
-                        break;
-                    default:
-                        error = getResources().getString(R.string.operationNotImplemented);
-                        break;
-                }
-            } else if (arity == 2) {
-                switch (operation) {
-                    case ADDITION:
-                        results.add(operands[0].add(operands[1]));
-                        break;
-                    case MULTIPLICATION:
-                        results.add(operands[0].multiply(operands[1]));
-                        break;
-                    case EXPONENTIATION:
-                        //y^x; x is operands[1]; y is operands[0]
-                        if (operands[0].compareTo(BigDecimal.ZERO) > 0) {
-                            results.add(new BigDecimal(Math.pow(operands[0].doubleValue(), operands[1].doubleValue()), getGoodContext(operands)));
-                        } else {
+                            break;
+                        default:
+                            error = getResources().getString(R.string.operationNotImplemented);
+                            break;
+                    }
+                } else if (arity == 1) {
+                    BigDecimal result;
+                    BigDecimal radians;
+                    switch (operation) {
+                        case INVERSION:
+                            if (operands[0].compareTo(BigDecimal.ZERO) == 0) {
+                                error = getResources().getString(R.string.divisionByZero);
+                            } else {
+                                result = BigDecimal.ONE.divide(operands[0], DEFAULT_MATH_CONTEXT);
+                                results.add(result);
+                            }
+                            break;
+                        case SQUARE:
                             try {
-                                BigInteger exponent = operands[1].toBigIntegerExact();
-                                BigDecimal result = new BigDecimal(Math.pow(operands[0].doubleValue(), exponent.doubleValue()));
+                                result = operands[0].pow(2, getGoodContext(operands[0]));
                                 results.add(result);
                             }catch(ArithmeticException e) {
-                                error = getResources().getString(R.string.negativeBaseExponentiation);
+                                error = getString(R.string.numberTooBig);
                             }
-                        }
-                        break;
-                    case SUBTRACTION:
-                        results.add(operands[0].subtract(operands[1]));
-                        break;
-                    case DIVISION:
-                        if (operands[1].compareTo(BigDecimal.ZERO) == 0) {
-                            error = getResources().getString(R.string.divisionByZero);
-                        } else {
-                            results.add(operands[0].divide(operands[1], getGoodContext(operands)));
-                        }
-                        break;
-                    case ROOTYX:
-                        //x^(1/y); x is operands[1]; y is operands[0]
-                        if (operands[1].compareTo(BigDecimal.ZERO) > 0) {
-                            results.add(new BigDecimal(
-                                    Math.pow(operands[1].doubleValue(), BigDecimal.ONE.divide(operands[0], DEFAULT_MATH_CONTEXT).doubleValue()),
-                                    getGoodContext(operands)));
-                        } else {
-                            error = getResources().getString(R.string.negativeRadicand);
-                        }
-                        break;
-                    case LOGYX:
-                        //log(x) in base y; x is operands[1]; y is operands[0]
-                        if (operands[0].compareTo(BigDecimal.ZERO) <= 0
-                                || operands[1].compareTo(new BigDecimal("0.0")) <= 0) {
-                            error = getResources().getString(R.string.logOutOfRange);
-                        } else {
-                            results.add(new BigDecimal(Math.log(operands[1].doubleValue())).
-                                    divide(new BigDecimal(Math.log(operands[0].doubleValue())), getGoodContext(operands)));
-                        }
-                        break;
-                    case HYPOTENUSE_PYTHAGORAS:
-                        if (operands[0].compareTo(BigDecimal.ZERO) < 0 || operands[1].compareTo(BigDecimal.ZERO) < 0) {
-                            error = getResources().getString(R.string.sideCantBeNegative);
-                        } else {
-                            results.add(operands[0]);
-                            results.add(operands[1]);
-                            results.add(new BigDecimal(
-                                    Math.hypot(operands[0].doubleValue(), operands[1].doubleValue()),
-                                    getGoodContext(operands)));
-                        }
-                        break;
-                    case LEG_PYTHAGORAS:
-                        if (operands[0].compareTo(BigDecimal.ZERO) < 0 || operands[1].compareTo(BigDecimal.ZERO) < 0) {
-                            error = getResources().getString(R.string.sideCantBeNegative);
-                        } else {
-                            BigDecimal hyp = operands[0].max(operands[1]);
-                            BigDecimal leg = operands[0].min(operands[1]);
-                            results.add(operands[0]);
-                            results.add(operands[1]);
-                            results.add(new BigDecimal(
-                                    Math.sqrt(hyp.pow(2).subtract(leg.pow(2)).doubleValue()),
-                                    getGoodContext(operands)));
-                        }
-                        break;
-                    default:
-                        error = getResources().getString(R.string.operationNotImplemented);
-                        break;
+                            break;
+                        case NEGATIVE:
+                            result = operands[0].negate();
+                            results.add(result);
+                            break;
+                        case SQUAREROOT:
+                            if (operands[0].compareTo(BigDecimal.ZERO) < 0) {
+                                error = getResources().getString(R.string.negativeSquareRoot);
+                            } else if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.sqrt(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                results.add(result);
+                            }
+                            break;
+                        case SINE:
+                            radians = operands[0];
+                            if (angleMode == AngleMode.DEGREE) {
+                                radians = toRadians(operands[0]);
+                            }
+                            if (doubleIsInfinite(radians)) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.sin(radians.doubleValue()), getGoodContext(operands[0]));
+                                results.add(result);
+                            }
+                            break;
+                        case COSINE:
+                            try {
+                                result = getHardcodedCosine(operands[0], angleMode);
+                                results.add(result);
+                            }catch(IllegalArgumentException e) {
+                                radians = operands[0];
+                                if (angleMode == AngleMode.DEGREE) {
+                                    radians = toRadians(operands[0]);
+                                }
+                                if (doubleIsInfinite(radians)) {
+                                    error = getResources().getString(R.string.numberTooBig);
+                                } else {
+                                    result = new BigDecimal(Math.cos(radians.doubleValue()), getGoodContext(operands[0]));
+                                    //                            result = new BigDecimal(Math.cos(radians.doubleValue()), getGoodContext(operands[0])).setScale(9, RoundingMode.HALF_UP);
+                                    results.add(result);
+                                }
+                            }
+                            break;
+                        case TANGENT:
+                            try {
+                                result = getHardcodedTangent(operands[0], angleMode);
+                                if (result != null) {
+                                    results.add(result);
+                                } else {
+                                    error = getString(R.string.tangentOutOfDomain);
+                                }
+                            }catch(IllegalArgumentException e) {
+                                radians = operands[0];
+                                if (angleMode == AngleMode.DEGREE) {
+                                    radians = toRadians(operands[0]);
+                                }
+                                if (doubleIsInfinite(radians)) {
+                                    error = getResources().getString(R.string.numberTooBig);
+                                } else {
+                                    result = new BigDecimal(Math.tan(radians.doubleValue()), getGoodContext(operands[0])).setScale(9, RoundingMode.HALF_UP);
+                                    results.add(result);
+                                }
+                            }
+                            break;
+                        case ARCSINE:
+                            if (operands[0].compareTo(BigDecimal.ONE.negate()) < 0
+                                    || operands[0].compareTo(BigDecimal.ONE) > 0) {
+                                error = getResources().getString(R.string.arcsineOutOfRange);
+                            } else if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.asin(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                if (angleMode == AngleMode.DEGREE) {
+                                    result = toDegrees(result);
+                                }
+                                results.add(result);
+                            }
+                            break;
+                        case ARCCOSINE:
+                            if (operands[0].compareTo(new BigDecimal("-1.0")) < 0
+                                    || operands[0].compareTo(new BigDecimal("1.0")) > 0) {
+                                error = getResources().getString(R.string.arccosineOutOfRange);
+                            } else if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.acos(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                if (angleMode == AngleMode.DEGREE) {
+                                    result = toDegrees(result);
+                                }
+                                results.add(result);
+                            }
+                            break;
+                        case ARCTANGENT:
+                            if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.atan(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                if (angleMode == AngleMode.DEGREE) {
+                                    result = toDegrees(result);
+                                    results.add(result);
+                                }
+                            }
+                            break;
+                        case SINE_H:
+                            if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                try {
+                                    result = new BigDecimal(Math.sinh(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                    results.add(result);
+                                }catch(NumberFormatException e) {
+                                    error = getString(R.string.numberTooBig);
+                                }
+                            }
+                            break;
+                        case COSINE_H:
+                            if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                try {
+                                    result = new BigDecimal(Math.cosh(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                    results.add(result);
+                                }catch(NumberFormatException e) {
+                                    error = getString(R.string.numberTooBig);
+                                }
+                            }
+                            break;
+                        case TANGENT_H:
+                            if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                try {
+                                    result = new BigDecimal(Math.tanh(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                    results.add(result);
+                                }catch(NumberFormatException e) {
+                                    error = getString(R.string.numberTooBig);
+                                }
+                            }
+                            break;
+                        case LOG10:
+                            if (operands[0].compareTo(BigDecimal.ZERO) <= 0) {
+                                error = getResources().getString(R.string.logOutOfRange);
+                            } else if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.log10(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                results.add(result);
+                            }
+                            break;
+                        case LOGN:
+                            if (operands[0].compareTo(BigDecimal.ZERO) <= 0) {
+                                error = getResources().getString(R.string.logOutOfRange);
+                            } else if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                result = new BigDecimal(Math.log(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                results.add(result);
+                            }
+                            break;
+                        case EXPONENTIAL:
+                            if (doubleIsInfinite(operands[0])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                try {
+                                    result = new BigDecimal(Math.exp(operands[0].doubleValue()), getGoodContext(operands[0]));
+                                    results.add(result);
+                                }catch(NumberFormatException e) {
+                                    error = getResources().getString(R.string.numberTooBig);
+                                }
+                            }
+                            break;
+                        case FACTORIAL:
+                            try {
+                                if (operands[0].compareTo(new BigDecimal(1000)) > 0) {
+                                    error = getResources().getString(R.string.numberTooBig);
+                                } else {
+                                    BigInteger operand = operands[0].toBigIntegerExact();
+                                    result = new BigDecimal(factorial(operand));
+                                    results.add(result);
+                                }
+                            }catch(ArithmeticException e) {
+                                error = getResources().getString(R.string.wrongFactorial);
+                            }
+                            break;
+                        case DEGTORAD:
+                            result = toRadians(operands[0]);
+                            results.add(result);
+                            break;
+                        case RADTODEG:
+                            result = toDegrees(operands[0]);
+                            results.add(result);
+                            break;
+                        case FLOOR:
+                            results.add(operands[0].setScale(0, RoundingMode.FLOOR));
+                            break;
+                        case ROUND:
+                            results.add(operands[0].setScale(0, RoundingMode.HALF_UP));
+                            break;
+                        case CEIL:
+                            results.add(operands[0].setScale(0, RoundingMode.CEILING));
+                            break;
+                        case CIRCLE_SURFACE:
+                            if (operands[0].compareTo(BigDecimal.ZERO) < 0) {
+                                error = getResources().getString(R.string.negativeRadius);
+                            } else {
+                                try {
+                                    result = operands[0].pow(2).multiply(BIG_PI, getGoodContext(operands[0]));
+                                    results.add(result);
+                                }catch(ArithmeticException e) {
+                                    error = getString(R.string.numberTooBig);
+                                }
+                            }
+                            break;
+                        default:
+                            error = getResources().getString(R.string.operationNotImplemented);
+                            break;
+                    }
+                } else if (arity == 2) {
+                    switch (operation) {
+                        case ADDITION:
+                            results.add(operands[0].add(operands[1]));
+                            break;
+                        case MULTIPLICATION:
+                            results.add(operands[0].multiply(operands[1]));
+                            break;
+                        case EXPONENTIATION:
+                            //y^x; x is operands[1]; y is operands[0]
+                            if (doubleIsInfinite(operands[0]) || doubleIsInfinite(operands[1])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else if (operands[0].compareTo(BigDecimal.ZERO) > 0) {
+                                try {
+                                    BigDecimal result = new BigDecimal(Math.pow(operands[0].doubleValue(), operands[1].doubleValue()), getGoodContext(operands));
+                                    results.add(result);
+                                }catch(NumberFormatException e) {
+                                    error = getResources().getString(R.string.numberTooBig);
+                                }
+                            } else {
+                                try {
+                                    BigInteger exponent = operands[1].toBigIntegerExact();
+                                    BigDecimal result = new BigDecimal(Math.pow(operands[0].doubleValue(), exponent.doubleValue()));
+                                    results.add(result);
+                                }catch(ArithmeticException e) {
+                                    error = getResources().getString(R.string.negativeBaseExponentiation);
+                                }catch(NumberFormatException e) {
+                                    error = getResources().getString(R.string.numberTooBig);
+                                }
+                            }
+                            break;
+                        case SUBTRACTION:
+                            results.add(operands[0].subtract(operands[1]));
+                            break;
+                        case DIVISION:
+                            if (operands[1].compareTo(BigDecimal.ZERO) == 0) {
+                                error = getResources().getString(R.string.divisionByZero);
+                            } else {
+                                results.add(operands[0].divide(operands[1], getGoodContext(operands)));
+                            }
+                            break;
+                        case ROOTYX:
+                            //x^(1/y); x is operands[1]; y is operands[0]
+                            if (doubleIsInfinite(operands[1])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else if (operands[0].compareTo(BigDecimal.ZERO) == 0) {
+                                error = getString(R.string.rootIndexZero);
+                            } else if (operands[1].compareTo(BigDecimal.ZERO) > 0) {
+                                results.add(new BigDecimal(
+                                        Math.pow(operands[1].doubleValue(), BigDecimal.ONE.divide(operands[0], DEFAULT_MATH_CONTEXT).doubleValue()),
+                                        getGoodContext(operands)));
+                            } else {
+                                error = getResources().getString(R.string.negativeRadicand);
+                            }
+                            break;
+                        case LOGYX:
+                            //log(x) in base y; x is operands[1]; y is operands[0]
+                            if (operands[0].compareTo(BigDecimal.ZERO) <= 0
+                                    || operands[1].compareTo(new BigDecimal("0.0")) <= 0) {
+                                error = getResources().getString(R.string.logOutOfRange);
+                            } else if (doubleIsInfinite(operands[0]) || doubleIsInfinite(operands[1])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else {
+                                BigDecimal divisor = new BigDecimal(Math.log(operands[0].doubleValue()));
+                                if (divisor.compareTo(BigDecimal.ZERO) == 0) {
+                                    error = getString(R.string.logBaseIsOne);
+
+                                } else {
+                                    results.add(new BigDecimal(Math.log(operands[1].doubleValue())).
+                                            divide(divisor, getGoodContext(operands)));
+                                }
+                            }
+                            break;
+                        case HYPOTENUSE_PYTHAGORAS:
+                            if (doubleIsInfinite(operands[0]) || doubleIsInfinite(operands[1])) {
+                                error = getResources().getString(R.string.numberTooBig);
+                            } else if (operands[0].compareTo(BigDecimal.ZERO) < 0 || operands[1].compareTo(BigDecimal.ZERO) < 0) {
+                                error = getResources().getString(R.string.sideCantBeNegative);
+                            } else {
+                                results.add(operands[0]);
+                                results.add(operands[1]);
+                                results.add(new BigDecimal(
+                                        Math.hypot(operands[0].doubleValue(), operands[1].doubleValue()),
+                                        getGoodContext(operands)));//TODO don't use Math.hypot and avoid .doubleValue()
+                            }
+                            break;
+                        case LEG_PYTHAGORAS:
+                            if (operands[0].compareTo(BigDecimal.ZERO) < 0 || operands[1].compareTo(BigDecimal.ZERO) < 0) {
+                                error = getResources().getString(R.string.sideCantBeNegative);
+                            } else {
+                                BigDecimal hyp = operands[0].max(operands[1]);
+                                BigDecimal leg = operands[0].min(operands[1]);
+                                BigDecimal subtract = hyp.pow(2).subtract(leg.pow(2));
+                                if (doubleIsInfinite(subtract)) {
+                                    error = getString(R.string.numberTooBig);
+                                } else {
+                                    results.add(operands[0]);
+                                    results.add(operands[1]);
+                                    results.add(new BigDecimal(Math.sqrt(subtract.doubleValue()), getGoodContext(operands)));
+                                }
+                            }
+                            break;
+                        default:
+                            error = getResources().getString(R.string.operationNotImplemented);
+                            break;
+                    }
+                } else if (arity == 3) {
+                    switch (operation) {
+                        case TRIANGLE_SURFACE:
+                            BigDecimal p = operands[0].add(operands[1]).add(operands[2]).divide(new BigDecimal(2), DEFAULT_MATH_CONTEXT);
+                            BigDecimal q = p.multiply(p.subtract(operands[0]))
+                                    .multiply(p.subtract(operands[1]))
+                                    .multiply(p.subtract(operands[2]));
+                            if (q.compareTo(BigDecimal.ZERO) < 0) {
+                                error = getResources().getString(R.string.notATriangle);
+                            } else if (doubleIsInfinite(q)) {
+                                error = getString(R.string.numberTooBig);
+                            } else {
+                                results.add(new BigDecimal(Math.sqrt(q.doubleValue()), getGoodContext(operands)));
+                            }
+                            break;
+                        case QUARATIC_EQUATION:
+                            //0=ax2+bx+c, a==z==op[0]; b==y==op[1]; c==x==op[2]
+                            BigDecimal a = operands[0];
+                            BigDecimal b = operands[1];
+                            BigDecimal c = operands[2];
+                            BigDecimal radicand = b.pow(2).subtract(a.multiply(c).multiply(new BigDecimal(4)));
+                            if (doubleIsInfinite(radicand)) {
+                                error = getString(R.string.numberTooBig);
+                            } else if (radicand.compareTo(BigDecimal.ZERO) < 0) {
+                                error = getString(R.string.complexNumber);
+                            } else {
+                                BigDecimal root = new BigDecimal(Math.sqrt(radicand.doubleValue()));
+                                results.add(root.subtract(b).divide(a.multiply(new BigDecimal(2)), DEFAULT_MATH_CONTEXT));
+                                results.add(root.negate().subtract(b).divide(a.multiply(new BigDecimal(2)), DEFAULT_MATH_CONTEXT));
+                            }
+                            break;
+                        default:
+                            error = getResources().getString(R.string.operationNotImplemented);
+                            break;
+                    }
+                } else {
+                    error = getResources().getString(R.string.operationNotImplemented);
                 }
-            } else if (arity == 3) {
-                switch (operation) {
-                    case TRIANGLE_SURFACE:
-                        BigDecimal p = operands[0].add(operands[1]).add(operands[2]).divide(new BigDecimal(2), DEFAULT_MATH_CONTEXT);
-                        BigDecimal q = p.multiply(p.subtract(operands[0]))
-                                .multiply(p.subtract(operands[1]))
-                                .multiply(p.subtract(operands[2]));
-                        if (q.compareTo(BigDecimal.ZERO) < 0) {
-                            error = getResources().getString(R.string.notATriangle);
-                        } else {
-                            results.add(new BigDecimal(Math.sqrt(q.doubleValue()), getGoodContext(operands)));
-                        }
-                        break;
-                    case QUARATIC_EQUATION:
-                        //0=ax2+bx+c, a==z==op[0]; b==y==op[1]; c==x==op[2]
-                        BigDecimal a = operands[0];
-                        BigDecimal b = operands[1];
-                        BigDecimal c = operands[2];
-                        BigDecimal root = new BigDecimal(Math.sqrt(b.pow(2).subtract(a.multiply(c).multiply(new BigDecimal(4))).doubleValue()));
-                        results.add(root.subtract(b).divide(a.multiply(new BigDecimal(2)), DEFAULT_MATH_CONTEXT));
-                        results.add(root.negate().subtract(b).divide(a.multiply(new BigDecimal(2)), DEFAULT_MATH_CONTEXT));
-                        break;
-                    default:
-                        error = getResources().getString(R.string.operationNotImplemented);
-                        break;
-                }
-            } else {
-                error = getResources().getString(R.string.operationNotImplemented);
+            }catch(ArithmeticException e) {
+                error = getString(R.string.numberTooBig);
             }
 
             if (error != null) {
@@ -1523,8 +1787,45 @@ public class MainActivity extends Activity {
                 simpleChange.redoNumbersSize = results.size();
                 historySaver.saveSimpleChange(simpleChange);
                 addNumbers(results);
+
+                for(int i = 0; i < results.size(); i++) {
+//                    numberStackDraggableAdapter.animate(numberStack.size() - 1 - i);
+                    stackAnimator.animate(numberStack.size() - 1 - i);
+                }
             }
         }
+    }
+
+    static private BigDecimal getHardcodedCosine(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException{
+        BigDecimal degrees = angle;
+        if (angleMode == AngleMode.RADIAN) {
+            degrees = toDegrees(angle);
+        }
+
+        BigDecimal remainder = degrees.abs().remainder(new BigDecimal(360), getGoodContext(angle));
+        if(remainder.compareTo(new BigDecimal(90)) == 0 || remainder.compareTo(new BigDecimal(270)) == 0){
+            return BigDecimal.ZERO;
+        }else{
+            throw new IllegalArgumentException();
+        }
+    }
+
+    static private BigDecimal getHardcodedTangent(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException {
+        BigDecimal degrees = angle;
+        if (angleMode == AngleMode.RADIAN) {
+            degrees = toDegrees(angle);
+        }
+
+        BigDecimal remainder = degrees.abs().remainder(new BigDecimal(360), getGoodContext(angle)).setScale(9, RoundingMode.HALF_UP);
+        if(remainder.compareTo(new BigDecimal(90)) == 0 || remainder.compareTo(new BigDecimal(270)) == 0){
+            return null;
+        }else{
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private static boolean doubleIsInfinite(BigDecimal number) {
+        return number.doubleValue() == Double.NEGATIVE_INFINITY || number.doubleValue() == Double.POSITIVE_INFINITY;
     }
 
     private static BigInteger factorial(BigInteger operand) {
@@ -1561,30 +1862,29 @@ public class MainActivity extends Activity {
         return new MathContext(precision, ROUNDING_MODE);
     }
 
-    /** This is used to show 4.499999 as 4.500000, while internally it's still stored as 4.499999
+    /**
+     * This is used to show 4.499999 as 4.500000, while internally it's still stored as 4.499999
+     *
      * @param number
      * @return
      */
-    public static String toString(BigDecimal number) {
+    public String toString(BigDecimal number) {
         int precision = number.precision();
         if (precision >= GOOD_PRECISION) {
             precision--;
         }
-        return String.format(number.round(new MathContext(precision, ROUNDING_MODE)).toString());
+        return localizeDecimalSeparator(number.round(new MathContext(precision, ROUNDING_MODE)).toString());
     }
 
     String localizeDecimalSeparator(String str) {
-        StringBuilder localized = new StringBuilder(str);
         char decimalSeparator = getResources().getString(R.string.decimalSeparator).charAt(0);
-        int position = str.indexOf('.');
-        localized.setCharAt(position, decimalSeparator);
-        return localized.toString();
+        return str.replace('.', decimalSeparator);
     }
 
     private void switchAngleMode() {
         if (angleMode == AngleMode.DEGREE) {
             angleMode = AngleMode.RADIAN;
-        }else{
+        } else {
             angleMode = AngleMode.DEGREE;
         }
         showAngleMode();
@@ -1598,6 +1898,10 @@ public class MainActivity extends Activity {
         tvError.setText(getResources().getString(R.string.error) + ": " + str);
         scrollError.setVisibility(View.VISIBLE);
         scrollEditableNumber.setVisibility(GONE);
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            errorBackgroundAnimator.start();
+        }
     }
 
     static String removeZeros(String string, boolean keepTrailingZeros, String decimalSeparator) {
@@ -1665,18 +1969,51 @@ public class MainActivity extends Activity {
         return stringNumbers;
     }
 
-}
-//From most important to least:
+    @Override
+    public void onScrollChanged() {
+        layoutNumbersDraggable.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateArrowVisibility();
+            }
+        }, 280);
+    }
 
-//TODO bug: 1000! & drag <- Fix the hack in DragNDropListView
-//TODO bug: 1000! sqrt() (operand.doubleValue() gives infinity, check that
-//TODO localize decimal separator: localize editableNumber & stack numbers
-//TODO highlight reordered numbers for a little while
-//TODO add some background to editableNumber
-//TODO show up&down arrows in stack listview, like in LevelSelector of AnutoTD
-//TODO fix icon fn- to exactly match fn+ <- Just run convert.py and copy new drawables
-//TODO tvError gone and visible makes DEG move up and down, slightly
+    private void updateArrowVisibility() {
+        // code taken from my fork of Anuto TD
+
+        final int numberViews = layoutNumbersDraggable.getChildCount();
+        if (numberViews <= 0) {
+            arrowUp.setVisibility(View.INVISIBLE);
+            arrowDown.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        final int firstVisibleNumber = layoutNumbersDraggable.getFirstVisiblePosition();
+        if (firstVisibleNumber == 0) {
+            arrowUp.setVisibility(layoutNumbersDraggable.getChildAt(0).getTop() < -20 ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            arrowUp.setVisibility(firstVisibleNumber > 0 ? View.VISIBLE : View.INVISIBLE);
+        }
+
+        final int stackSize = numberStack.size();
+        final int lastVisibleNumber = layoutNumbersDraggable.getLastVisiblePosition();
+        if (lastVisibleNumber == stackSize - 1) {
+            int marginFix = (int) getResources().getDimension(R.dimen.arrowMarginFix);
+            arrowDown.setVisibility(layoutNumbersDraggable.getChildAt(numberViews - 1).getBottom() > layoutNumbersDraggable.getHeight() + marginFix ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            arrowDown.setVisibility(lastVisibleNumber < stackSize - 1 ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+}
+//TODO catch NumberFormatException in every addEditableToStack call
+//TODO 1000! & drag <- Fix the hack in DragNDropListView
 //TODO add little help (dragNdrop, click on number, &c). Where?
+//TODO long press in operation -> help
+//TODO touch error -> copy
+//TODO explore new layouts with editable above everything else. Stack listview would need to be reversed and scrolled to top
 //TODO make standard deviation with mean or something. Test estadísticos, quizás Q de dixon, etc.
 //TODO replace all sqrt with custom BigSqrt
-//TODO custom button layout
+//TODO tvAngleMode must leave. Make two DEG<->RAD drawables and switch between them. Or maybe it's just the tv for editable which is too small
+//TODO custom button panel layout

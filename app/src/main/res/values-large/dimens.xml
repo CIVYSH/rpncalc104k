@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="number_letter_text_size">15sp</dimen>
-    <dimen name="number_letter_width">15sp</dimen>
     <dimen name="number_index_text_size">15sp</dimen>
-    <dimen name="number_index_width">20sp</dimen>
+    <dimen name="number_index_width">30sp</dimen>
     <dimen name="list_numbers_text_size">25sp</dimen>
     <dimen name="draggable_handler_size">28sp</dimen>
 

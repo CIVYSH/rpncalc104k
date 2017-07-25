@@ -6,6 +6,7 @@ gradle*
 local*
 .directory
 .settings/
+screenshots-*/
 
 #website has its own branch gh-pages
 pages/

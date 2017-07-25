@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="activity_background_color">#101010</color>
+    <color name="button_text_color">@android:color/primary_text_dark</color>
+    <color name="error_text_color">@android:color/primary_text_dark</color>
+    <color name="button_digit_light_color">#4a6dd7</color>
+    <color name="button_digit_dark_color">#1b1e36</color>
+
+    <color name="button_control_light_color">#804391</color>
+    <color name="button_control_dark_color">#26152b</color>
+    <color name="button_control_enter_light_color">#3ba692</color>
+    <color name="button_control_enter_dark_color">#1a2b25</color>
+    <color name="button_control_pop_light_color">#c63346</color>
+    <color name="button_control_pop_dark_color">#3b1c22</color>
+
+    <color name="button_page_light_color">#9a51ae</color>
+    <color name="button_page_dark_color">#301b36</color>
+    <color name="button_operation_light_color">#686868</color>
+    <color name="button_operation_dark_color">#2e2e2e</color>
+
+    <color name="editable_border_color">@color/activity_background_color</color>
+    <color name="editable_background_color">#303030</color>
+    <color name="arrow_color">#4f98f1</color>
+    <color name="dropped_background_color">#484848</color>
+    <color name="stack_number_background">#191919</color>
+    <color name="new_error_background_color">#484848</color>
+
+</resources>
