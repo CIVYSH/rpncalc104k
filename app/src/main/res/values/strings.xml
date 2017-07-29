@@ -33,4 +33,5 @@
     <string name="tangentOutOfDomain">That\'s infinite</string>
     <string name="complexNumber">That yields a complex number</string>
     <string name="logBaseIsOne">Log base can\'t be 1</string>
+    <string name="longOperation">That operation will take too long</string>
 </resources>

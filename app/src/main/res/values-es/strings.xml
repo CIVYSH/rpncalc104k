@@ -32,4 +32,5 @@
     <string name="complexNumber">El resultado es un número complejo</string>
     <string name="tangentOutOfDomain">Eso da infinito</string>
     <string name="logBaseIsOne">La base del logaritmo es 1</string>
+    <string name="longOperation">La operación tomará demasiado tiempo</string>
 </resources>

@@ -7,6 +7,7 @@ local*
 .directory
 .settings/
 screenshots-*/
+captures/
 
 #website has its own branch gh-pages
 pages/
