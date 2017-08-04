@@ -39,23 +39,24 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -581,20 +582,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
         return null;
     }
 
-    final ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(@NonNull Runnable r) {
-            Thread t = new Thread(r);
-            t.setPriority(1);//0 lowest, 10 highest
-            t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
-                @Override
-                public void uncaughtException(Thread t, Throwable e){
-                    Log.d(TAG, "Operation '"+t.getName() + "' ended with exception", e);
-                }
-            });
-            return t;
-        }
-    });
+    MyThreadPoolExecutor threadPool;
 
     private class OperationResult{
         BigDecimal[] operands;
@@ -627,7 +615,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
         }
 
         Future<OperationResult> start(){
-            return executorService.submit(this);
+            return threadPool.submit(this);
         }
 
         @Override
@@ -1326,16 +1314,14 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
             errorBackgroundAnimator.addUpdateListener(new BackgroundColorSetter(findViewById(R.id.parentDigits)));
         }
 
-//        if (mUsingViewAnimator) {
-//            Button b1 = (Button) findViewById(R.id.but1);
-//            Button b2 = (Button) findViewById(R.id.but2);
-//            ImageButton bUndo = (ImageButton) findViewById(R.id.butUndo);
-//            ImageButton bRedo = (ImageButton) findViewById(R.id.butRedo);
-//            ViewsWidthCopier copierUndo = new ViewsWidthCopier(b1, bUndo);
-//            ViewsWidthCopier copierRedo = new ViewsWidthCopier(b2, bRedo);
-//            b1.getViewTreeObserver().addOnPreDrawListener(copierUndo);
-//            b2.getViewTreeObserver().addOnPreDrawListener(copierRedo);
-//        }
+        final int corePoolSize = Integer.MAX_VALUE;
+        final int maximumPoolSize = Integer.MAX_VALUE;
+        final long keepAliveTimeS = 60L;
+        final TimeUnit keepAliveUnit = TimeUnit.SECONDS;
+        final int maxPoolQueueSize = 10;
+        threadPool = new MyThreadPoolExecutor(
+                corePoolSize, maximumPoolSize, keepAliveTimeS, keepAliveUnit,
+                new LinkedBlockingQueue<Runnable>(maxPoolQueueSize));
 
 //		 this hack always shows overflow menu in actionbar.
 //		  Used only on emulator with invisible hardware keys
@@ -1403,6 +1389,39 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
         saver.putSerializable(HISTORY_SAVER_PARAM, historySaver);
         saver.putInt(SWITCHER_INDEX_PARAM, switcherFunctions.getDisplayedChild());
         super.onSaveInstanceState(saver);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        disableKiller();
+    }
+
+    @Override
+    protected void onStop() {
+        if(threadPool.getActiveCount() > 0){
+            enableKiller();
+        }
+        super.onStop();
+    }
+
+    private void enableKiller(){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, CleanerService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 1000*10, pendingIntent);
+        Log.d(TAG, "Schedule an alarm to kill app & zombie threads in 10s");
+    }
+
+    private void disableKiller(){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, CleanerService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+
+        alarmManager.cancel(pendingIntent);
+        Log.d(TAG, "Disabled any scheduled cleaner/killer");
     }
 
     public void onRestoreInstanceState(Bundle saved) {
@@ -1858,8 +1877,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
             // 3. the code is pretty much unclear
             // 4. a rare race condition is detected and unfixed
             // 5. The long operation is abandoned in a zombie thread, wasting CPU & battery
-            // BUT I'll throw this into production and call it the Ñapa commit. I'm sorry.
-            // TODO: Try to forbid long operations and never reach timeout
+            // 5.a Well, when the app goes to background, an alarm kills the app to free resources
             // TODO: Fix that race condition
 
             OperationResult operationResult = new OperationResult(operands);
@@ -1873,7 +1891,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
             }catch(InterruptedException | ExecutionException | TimeoutException e) {
                 futureResult.cancel(true);
                 error = getString(R.string.longOperation);
-                Log.d(TAG, String.format("Operation too long. There are now %d zombie threads wasting your CPU", ((ThreadPoolExecutor) executorService).getActiveCount()));
+                Log.d(TAG, String.format("Operation too long. %d zombie threads will be killed when app is in background", threadPool.getActiveCount()));
             }
 
             operands = operationResult.operands;
@@ -1891,7 +1909,6 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
                 addNumbers(results);
 
                 for(int i = 0; i < results.size(); i++) {
-//                    numberStackDraggableAdapter.animate(numberStack.size() - 1 - i);
                     stackAnimator.animate(numberStack.size() - 1 - i);
                 }
             }
