@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+DragNDropList/
+RPNCalc104k.iml
+app/
+build/
+captures/
+gradle/
+local.properties
+screenshots-*/
