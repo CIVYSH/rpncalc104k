@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "net.project104.civyshkrpncalc"
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 22
         versionCode 12
         versionName "2.1.4"
@@ -14,9 +14,14 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("android-keystore.jks")
+            storeFile file("/home/bskr/datos/varios/keystore-android/android-keystore.jks")
             keyAlias "default"
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -24,12 +29,15 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            proguardFile '/home/besokare/Datos/informatica/StudioProjects/RPNCalc104k/app/proguard-rules.pro'
+            proguardFile '/home/bskr/datos/informatica/projectsAndroidStudio/RPNCalc104k/app/proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:22.2.1'
-    compile project(path: ':DragNDropList')
+    implementation 'com.android.support:appcompat-v7:22.2.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support:support-v4:22.2.1'
+    implementation project(path: ':DragNDropList')
+    implementation project(path: ':infixparser')
 }

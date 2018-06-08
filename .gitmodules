@@ -1,3 +1,6 @@
 [submodule "DragNDropList"]
 	path = DragNDropList
 	url = git@github.com:civyshk/DragNDropList.git
+[submodule "infixparser"]
+	path = infixparser
+	url = git@github.com:civyshk/infixparser.git

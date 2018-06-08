@@ -11,6 +11,7 @@
     <color name="button_control_dark_color">#26152b</color>
     <color name="button_control_enter_light_color">#3ba692</color>
     <color name="button_control_enter_dark_color">#1a2b25</color>
+    <color name="button_control_enter_disabled">#425652</color>
     <color name="button_control_pop_light_color">#c63346</color>
     <color name="button_control_pop_dark_color">#3b1c22</color>
 

@@ -16,16 +16,9 @@
 
 package net.project104.civyshkrpncalc;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
-import android.os.Build;
-import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,17 +28,11 @@ import com.terlici.dragndroplist.DragNDropListView;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 class NumberStackDraggableAdapter extends BaseAdapter implements DragNDropAdapter {
-    private WeakReference<MainActivity> activityReference;
+    private WeakReference<ActivityMain> activityReference;
 
-    NumberStackDraggableAdapter(MainActivity activity) {
+    NumberStackDraggableAdapter(ActivityMain activity) {
         activityReference = new WeakReference<>(activity);
     }
 
@@ -78,7 +65,7 @@ class NumberStackDraggableAdapter extends BaseAdapter implements DragNDropAdapte
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MainActivity activity = activityReference.get();
+        ActivityMain activity = activityReference.get();
         if (activity == null) {
             return convertView;
         }
@@ -104,7 +91,7 @@ class NumberStackDraggableAdapter extends BaseAdapter implements DragNDropAdapte
         }
         int index = size - position;
         viewHolder.tvIndex.setText(String.format("%s%d:", letter != null ? letter + "  " : "", index));
-        viewHolder.tvNumber.setText(activity.toString(((BigDecimal) getItem(position))));
+        viewHolder.tvNumber.setText(activity.asString(((BigDecimal) getItem(position))));
         viewHolder.ivHandler.setColorFilter(activity.getResources().getColor(R.color.error_text_color));
 
         return convertView;
@@ -116,7 +103,7 @@ class NumberStackDraggableAdapter extends BaseAdapter implements DragNDropAdapte
 
     @Override
     public void onItemDrop(DragNDropListView parent, View view, int startPosition, int endPosition, long id) {
-        MainActivity activity = activityReference.get();
+        ActivityMain activity = activityReference.get();
         if (activity != null) {
             activity.clickedSwap(true, startPosition, endPosition);
         }

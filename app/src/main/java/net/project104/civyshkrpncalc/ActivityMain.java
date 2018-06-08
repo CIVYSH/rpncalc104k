@@ -78,8 +78,8 @@ import com.terlici.dragndroplist.DragNDropListView;
 import static android.view.View.FOCUS_RIGHT;
 import static android.view.View.GONE;
 
-public class MainActivity extends Activity implements ViewTreeObserver.OnScrollChangedListener {
-    final static String TAG = MainActivity.class.getSimpleName();
+public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollChangedListener {
+    final static String TAG = ActivityMain.class.getSimpleName();
 
     final static BigDecimal BIG_PI = new BigDecimal(Math.PI);
     final static BigDecimal BIG_EULER = new BigDecimal(Math.E);
@@ -112,9 +112,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
         }
 
         public void run() {
-            if (Build.VERSION.SDK_INT >= 8) {
-                view.smoothScrollToPosition(numberStack.size() - 1);
-            }
+            view.smoothScrollToPosition(numberStack.size() - 1);
         }
     }
 
@@ -271,7 +269,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
                     View view = layoutNumbersDraggable.getChildAt(i);
                     int position = ((NumberStackDraggableAdapter.ViewHolder) view.getTag()).position;
                     if (toAnimateViews.contains(position)) {
-                        itemBackgroundAnimator.addUpdateListener(new MainActivity.BackgroundColorSetter(view));
+                        itemBackgroundAnimator.addUpdateListener(new ActivityMain.BackgroundColorSetter(view));
                         toAnimateViews.remove(position);
                         if (toAnimateViews.size() == 0) {
                             itemBackgroundAnimator.start();
@@ -357,7 +355,6 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
     interface Change extends Serializable {
         void undo();
-
         void redo();
     }
 
@@ -386,7 +383,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
         @Override
         public void undo() {
-            MainActivity activity = saver.getActivity();
+            ActivityMain activity = saver.getActivity();
 
             BigDecimal[] poppedNew = activity.popNumbers(redoNumbersSize);
             redoNumbers.clear();
@@ -399,7 +396,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
         @Override
         public void redo() {
-            MainActivity activity = saver.getActivity();
+            ActivityMain activity = saver.getActivity();
 
             activity.popNumbers(undoNumbers.size());
             activity.addNumbers(redoNumbers);
@@ -443,7 +440,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
         @Override
         public void undo() {
-            MainActivity activity = saver.getActivity();
+            ActivityMain activity = saver.getActivity();
 
             BigDecimal draggingNumber = activity.numberStack.remove(endPosition);
             activity.numberStack.add(startPosition, draggingNumber);
@@ -454,7 +451,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
         @Override
         public void redo() {
-            MainActivity activity = saver.getActivity();
+            ActivityMain activity = saver.getActivity();
 
 //            activity.clickedSwap(false, startPosition, endPosition);
             BigDecimal draggingNumber = activity.numberStack.remove(startPosition);
@@ -466,11 +463,11 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
     }
 
     static class HistorySaver implements Serializable {
-        transient WeakReference<MainActivity> activity;
+        transient WeakReference<ActivityMain> activity;
         private LinkedList<Change> changes = new LinkedList<Change>();
         int currentChangeIndex;
 
-        HistorySaver(MainActivity activity) {
+        HistorySaver(ActivityMain activity) {
             this.activity = new WeakReference<>(activity);
             currentChangeIndex = -1;
         }
@@ -528,11 +525,11 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
             }
         }
 
-        MainActivity getActivity() {
+        ActivityMain getActivity() {
             return activity.get();
         }
 
-        void setActivity(MainActivity activity) {
+        void setActivity(ActivityMain activity) {
             this.activity = new WeakReference<>(activity);
         }
     }
@@ -540,7 +537,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
     abstract class MyOnClickListener implements OnClickListener {
         @Override
         final public void onClick(View v) {
-            if (!MainActivity.this.layoutNumbersDraggable.isDragging()) {
+            if (!ActivityMain.this.layoutNumbersDraggable.isDragging()) {
                 myOnClick(v);
             }
         }
@@ -1117,12 +1114,21 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
         scrollEditableNumber = (HorizontalScrollView) findViewById(R.id.scrollEditableNumber);
         scrollError = (HorizontalScrollView) findViewById(R.id.scrollError);
+        scrollError.setVisibility(GONE);
         layoutNumbersDraggable = (DragNDropListView) findViewById(R.id.listNumbersDraggable);
         tvAngleMode = (TextView) findViewById(R.id.tvAngleMode);
         tvEditableNumber = (TextView) findViewById(R.id.tvEditableNumber);
         tvError = (TextView) findViewById(R.id.tvError);
 
         tvEditableNumber.setGravity(Gravity.END | Gravity.CENTER);
+        tvEditableNumber.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentParse = new Intent(ActivityMain.this, ActivityParser.class);
+                intentParse.putExtra("Input", editableNumber.toString());
+                startActivityForResult(intentParse, 1);
+            }
+        });
 
         angleMode = AngleMode.DEGREE;
         showAngleMode();
@@ -1288,7 +1294,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
             @Override
             public void onItemClick(AdapterView<?> adapter, View v, int position, long itemId) {
                 BigDecimal number = (BigDecimal) adapter.getItemAtPosition(position);
-                MainActivity.this.clickedStackNumber(true, number);
+                ActivityMain.this.clickedStackNumber(true, number);
                 stackAnimator.animate(position);
                 stackAnimator.animate(numberStack.size() - 1);
             }
@@ -1336,6 +1342,17 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 //			e.printStackTrace();
 //		}
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                enteredParsedNumber(data.getStringExtra("Result"), true);
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d(TAG, "Activity parse was canceled");
+            }
+        }
     }
 
     @Override
@@ -1394,7 +1411,6 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
     @Override
     protected void onStart() {
         super.onStart();
-
         disableKiller();
     }
 
@@ -1408,11 +1424,13 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 
     private void enableKiller(){
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, CleanerService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
-
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 1000*10, pendingIntent);
-        Log.d(TAG, "Schedule an alarm to kill app & zombie threads in 10s");
+        if(alarmManager != null) {
+            Intent intent = new Intent(this, CleanerService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + 1000 * 10, pendingIntent);
+            Log.d(TAG, "Schedule an alarm to kill app & zombie threads in 10s");
+        }
     }
 
     private void disableKiller(){
@@ -1544,6 +1562,29 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
     boolean isEditableNumberInStack() {
         return editableNumber.length() > 0 && !editableNumber.toString().equals("-");
         //Any other string (0. 0.2 1E 2.3E) must be in stack, but not "-"
+    }
+
+    void enteredParsedNumber(String text, boolean save){
+        SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
+        simpleChange.tag = "Parsed: " + text;
+
+        boolean removePrevious = isEditableNumberInStack();
+        if (save && removePrevious) {
+            simpleChange.addOld(getLastNumber());
+        }
+        editableNumber.set(text);
+
+        try {
+            boolean addedNumber = addEditableToStack(removePrevious ? UpdateStackFlag.REMOVE_PREVIOUS : UpdateStackFlag.KEEP_PREVIOUS);
+            if (save) {
+                if (addedNumber) {
+                    simpleChange.redoNumbersSize = 1;
+                }
+                historySaver.saveSimpleChange(simpleChange);
+            }
+        }catch(NumberFormatException e) {
+            editableNumber.pop();
+        }
     }
 
     void clickedDigit(int digit, boolean save) {
@@ -1709,6 +1750,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
     void clickedDelete(boolean save) {
         if (scrollError.getVisibility() == View.VISIBLE) {
             scrollError.setVisibility(GONE);
+            scrollEditableNumber.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -1769,6 +1811,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
     void clickedPopNumber(boolean save) {
         if (scrollError.getVisibility() == View.VISIBLE) {
             scrollError.setVisibility(GONE);
+            scrollEditableNumber.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -1987,7 +2030,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
      * @param number
      * @return
      */
-    public String toString(BigDecimal number) {
+    public String asString(BigDecimal number) {
         int precision = number.precision();
         if (precision >= GOOD_PRECISION) {
             precision--;
@@ -2130,7 +2173,7 @@ public class MainActivity extends Activity implements ViewTreeObserver.OnScrollC
 //TODO 1000! & drag <- Fix the hack in DragNDropListView
 //TODO add little help (dragNdrop, click on number, &c). Where?
 //TODO long press in operation -> help
-//TODO touch error or editable -> copy
+//TODO long press on error or editable - > copy
 //TODO explore new layouts with editable above everything else. Stack listview would need to be reversed and scrolled to top
 //TODO make standard deviation with mean or something. Test estadísticos, quizás Q de dixon, etc.
 //TODO replace all sqrt with custom BigSqrt

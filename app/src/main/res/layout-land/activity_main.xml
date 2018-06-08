@@ -24,7 +24,7 @@
               android:layout_height="match_parent"
               android:orientation="horizontal"
               android:background="@color/activity_background_color"
-              tools:context=".MainActivity">
+              tools:context=".ActivityMain">
 
     <LinearLayout
         android:id="@+id/fixedLayout"
