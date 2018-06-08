@@ -1,6 +1,5 @@
 package net.project104.civyshkrpncalc;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.concurrent.BlockingQueue;
@@ -23,7 +22,7 @@ class MyThreadPoolExecutor extends ThreadPoolExecutor {
         static final int THREAD_JAVA_PRIORITY = 2;//java priority from 0(least) to 10(most)
         static final String TAG = MyThreadFactory.class.getSimpleName();
 
-        public Thread newThread(@NonNull Runnable r){
+        public Thread newThread(Runnable r){
             Thread t = new Thread(r);
             t.setPriority(THREAD_JAVA_PRIORITY);
             t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
