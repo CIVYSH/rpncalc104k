@@ -19,8 +19,6 @@
 
 package net.project104.civyshkrpncalc;
 
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -29,7 +27,6 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,7 +43,6 @@ import java.util.concurrent.TimeoutException;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -75,7 +71,6 @@ import android.widget.ViewAnimator;
 
 import com.terlici.dragndroplist.DragNDropListView;
 
-import static android.view.View.FOCUS_RIGHT;
 import static android.view.View.GONE;
 
 public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollChangedListener {
@@ -93,16 +88,26 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     final static RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
     final static MathContext DEFAULT_MATH_CONTEXT = new MathContext(GOOD_PRECISION, ROUNDING_MODE);
 
-    final static String NUMBER_STACK_PARAM = "NumberStack";
     final static String DEGREE_MODE_PARAM = "AngleMode";
+    final static String NUMBER_STACK_PARAM = "NumberStack";
     final static String HISTORY_SAVER_PARAM = "HistorySaver";
     final static String SWITCHER_INDEX_PARAM = "SwitcherIndex";
-    static final String EDITABLE_NUMBER_PARAM = "EditableNumber";
+    final static String EDITABLE_NUMBER_PARAM = "EditableNumber";
 
-    static final boolean MERGE_DIGITS = true;
     static final boolean MERGE_DECIMAL = true;
+    static final boolean MERGE_DIGITS = true;
     static final boolean MERGE_MINUS = true;
     static final boolean MERGE_E = true;
+
+
+    enum UpdateStackFlag {
+        KEEP_PREVIOUS, REMOVE_PREVIOUS
+    }
+
+    enum AngleMode {
+        DEGREE, RADIAN
+    }
+
 
     private class ListViewScroller implements Runnable {
         ListView view;
@@ -116,19 +121,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    static private class HorizontalViewScroller implements Runnable {
-        HorizontalScrollView view;
-
-        HorizontalViewScroller(HorizontalScrollView view) {
-            this.view = view;
-        }
-
-        @Override
-        public void run() {
-            view.fullScroll(FOCUS_RIGHT);
-        }
-    }
-
     private DataSetObserver numberStackObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
@@ -136,24 +128,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             layoutNumbersDraggable.post(new ListViewScroller(layoutNumbersDraggable));
         }
     };
-
-    @TargetApi(11)
-    public static class BackgroundColorSetter implements ValueAnimator.AnimatorUpdateListener {
-        View view;
-
-        public BackgroundColorSetter(View view) {
-            this.view = view;
-        }
-
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            view.setBackgroundColor((Integer) animation.getAnimatedValue());
-        }
-    }
-
-    private ValueAnimator errorBackgroundAnimator;
-
-    LinkedList<BigDecimal> numberStack = new LinkedList<>();
 
     private class ViewedString {
         private static final int NUMBER_BUILDER_INITIAL_CAPACITY = 10;
@@ -224,22 +198,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    ViewedString editableNumber = new ViewedString();
-    boolean deleteCharBeforeDecimalSeparator = false;
-    boolean deleteCharBeforeScientificNotation = false;
-
-    AngleMode angleMode;
-    Integer[] digitButtonsIds;
-    HistorySaver historySaver;
-
-    DragNDropListView layoutNumbersDraggable;
-    ImageView arrowUp, arrowDown;
-    HorizontalScrollView scrollEditableNumber, scrollError;
-    TextView tvEditableNumber, tvError, tvAngleMode;
-    ViewAnimator switcherFunctions;
-
-    NumberStackDraggableAdapter numberStackDraggableAdapter;
-
     private class StackAnimator implements ViewTreeObserver.OnGlobalLayoutListener {
         Set<Integer> toAnimateViews = new HashSet<>();
         ValueAnimator itemBackgroundAnimator;
@@ -264,23 +222,22 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
         @Override
         public void onGlobalLayout() {
-            if (Build.VERSION.SDK_INT >= 11) {
-                for(int i = 0, size = layoutNumbersDraggable.getChildCount(); i < size; i++){
-                    View view = layoutNumbersDraggable.getChildAt(i);
-                    int position = ((NumberStackDraggableAdapter.ViewHolder) view.getTag()).position;
-                    if (toAnimateViews.contains(position)) {
-                        itemBackgroundAnimator.addUpdateListener(new ActivityMain.BackgroundColorSetter(view));
-                        toAnimateViews.remove(position);
-                        if (toAnimateViews.size() == 0) {
-                            itemBackgroundAnimator.start();
-                        }
+            if (Build.VERSION.SDK_INT < 11) {
+                return;
+            }
+            for(int i = 0, size = layoutNumbersDraggable.getChildCount(); i < size; i++){
+                View view = layoutNumbersDraggable.getChildAt(i);
+                int position = ((NumberStackDraggableAdapter.ViewHolder) view.getTag()).position;
+                if (toAnimateViews.contains(position)) {
+                    itemBackgroundAnimator.addUpdateListener(new BackgroundColorSetter(view));
+                    toAnimateViews.remove(position);
+                    if (toAnimateViews.isEmpty()) {
+                        itemBackgroundAnimator.start();
                     }
                 }
             }
         }
     }
-
-    StackAnimator stackAnimator;
 
     private class OperationData {
         int arity;
@@ -292,318 +249,12 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    private HashMap<Operation, OperationData> operationsData;
-
-    enum UpdateStackFlag {
-        KEEP_PREVIOUS, REMOVE_PREVIOUS
-    }
-
-    enum Operation {
-        ADDITION,
-        SUBTRACTION,
-        MULTIPLICATION,
-        DIVISION,
-
-        SQUARE,
-        SQUAREROOT,
-        EXPONENTIATION,
-        ROOTYX,
-        NEGATIVE,
-        INVERSION,
-
-        LOG10,
-        LOGYX,
-        LOGN,
-        EXPONENTIAL,
-        FACTORIAL,
-
-        SINE,
-        COSINE,
-        TANGENT,
-        ARCSINE,
-        ARCCOSINE,
-        ARCTANGENT,
-        SINE_H,
-        COSINE_H,
-        TANGENT_H,
-        DEGTORAD,
-        RADTODEG,
-
-        FLOOR,
-        ROUND,
-        CEIL,
-
-        SUMMATION,
-        SUMMATION_N,
-        MEAN,
-        MEAN_N,
-        CONSTANTPI,
-        CONSTANTEULER,
-        CONSTANTPHI,
-        RANDOM,
-
-        CIRCLE_SURFACE,
-        TRIANGLE_SURFACE,
-        HYPOTENUSE_PYTHAGORAS,
-        LEG_PYTHAGORAS,
-        QUARATIC_EQUATION
-    }
-
-    enum AngleMode {
-        DEGREE, RADIAN
-    }
-
-    interface Change extends Serializable {
-        void undo();
-        void redo();
-    }
-
-    static class SimpleChange implements Change {
-        Deque<BigDecimal> redoNumbers = new LinkedList<>();//ArrayDeque from API 9
-        Deque<BigDecimal> undoNumbers = new LinkedList<>();
-        int redoNumbersSize = 0;
-        String redoText, undoText;
-        HistorySaver saver;
-        boolean canMerge;
-        String tag = "";
-
-        SimpleChange(HistorySaver saver, String oldText) {
-            this(saver, oldText, false);
-        }
-
-        SimpleChange(HistorySaver saver, String oldText, boolean canMerge) {
-            this.undoText = oldText;
-            this.saver = saver;
-            this.canMerge = canMerge;
-        }
-
-        void addOld(BigDecimal number) {
-            undoNumbers.add(number);
-        }
-
-        @Override
-        public void undo() {
-            ActivityMain activity = saver.getActivity();
-
-            BigDecimal[] poppedNew = activity.popNumbers(redoNumbersSize);
-            redoNumbers.clear();
-            redoNumbers.addAll(Arrays.asList(poppedNew));
-            activity.addNumbers(undoNumbers);
-
-            redoText = activity.editableNumber.toString();
-            activity.editableNumber.set(undoText);
-        }
-
-        @Override
-        public void redo() {
-            ActivityMain activity = saver.getActivity();
-
-            activity.popNumbers(undoNumbers.size());
-            activity.addNumbers(redoNumbers);
-
-            activity.editableNumber.set(redoText);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("Change %s", tag);
-        }
-
-        public SimpleChange merge(SimpleChange other) {
-            if (!canMerge) {
-                return null;
-            } else if (other != null && other.canMerge) {
-                //This merge assumes that both Changes represent Digit, Decimal or Scientific changes
-                //Delete and other changes need different code for merge to work
-                SimpleChange newChange = new SimpleChange(saver, other.undoText, true);
-                newChange.redoNumbersSize = 1;
-                newChange.undoNumbers = other.undoNumbers;
-                return newChange;
-            } else {
-                return null;
-            }
-        }
-    }
-
-    static class SwapChange implements Change {
-        int startPosition, endPosition;
-        HistorySaver saver;
-        String undoText;
-
-        public SwapChange(HistorySaver saver, String undoText, int startPosition, int endPosition) {
-            this.startPosition = startPosition;
-            this.endPosition = endPosition;
-            this.saver = saver;
-            this.undoText = undoText;
-        }
-
-
-        @Override
-        public void undo() {
-            ActivityMain activity = saver.getActivity();
-
-            BigDecimal draggingNumber = activity.numberStack.remove(endPosition);
-            activity.numberStack.add(startPosition, draggingNumber);
-            activity.editableNumber.set(undoText);
-
-            activity.numberStackDraggableAdapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void redo() {
-            ActivityMain activity = saver.getActivity();
-
-//            activity.clickedSwap(false, startPosition, endPosition);
-            BigDecimal draggingNumber = activity.numberStack.remove(startPosition);
-            activity.numberStack.add(endPosition, draggingNumber);
-            activity.editableNumber.reset();
-
-            activity.numberStackDraggableAdapter.notifyDataSetChanged();
-        }
-    }
-
-    static class HistorySaver implements Serializable {
-        transient WeakReference<ActivityMain> activity;
-        private LinkedList<Change> changes = new LinkedList<Change>();
-        int currentChangeIndex;
-
-        HistorySaver(ActivityMain activity) {
-            this.activity = new WeakReference<>(activity);
-            currentChangeIndex = -1;
-        }
-
-        private void insertChange(int position, Change change) {
-            if (position >= changes.size()) {
-                changes.add(change);
-                currentChangeIndex = changes.size() - 1;
-            } else {
-                changes.set(position, change);
-                for (int i = position + 1, size = changes.size(); i < size; i++) {
-                    changes.removeLast();
-                }
-                currentChangeIndex = position;
-            }
-        }
-
-        private Change getPrevious() {
-            try {
-                return changes.get(currentChangeIndex);
-            }catch(IndexOutOfBoundsException e) {
-                return null;
-            }
-        }
-
-        void saveSimpleChange(SimpleChange change) {
-            Change previousChange = getPrevious();
-            if (previousChange instanceof SimpleChange) {
-                SimpleChange mergedChange = change.merge((SimpleChange) previousChange);
-                if (mergedChange != null) {
-                    insertChange(currentChangeIndex, mergedChange);
-                } else {
-                    insertChange(currentChangeIndex + 1, change);
-                }
-            } else {
-                insertChange(currentChangeIndex + 1, change);
-            }
-        }
-
-        void saveSwapChange(SwapChange change) {
-            insertChange(currentChangeIndex + 1, change);
-        }
-
-        synchronized void goBack() {
-            if (currentChangeIndex >= 0) {
-                changes.get(currentChangeIndex).undo();
-                --currentChangeIndex;
-            }
-        }
-
-        synchronized void goForward() {
-            if (currentChangeIndex < changes.size() - 1) {
-                ++currentChangeIndex;
-                changes.get(currentChangeIndex).redo();
-            }
-        }
-
-        ActivityMain getActivity() {
-            return activity.get();
-        }
-
-        void setActivity(ActivityMain activity) {
-            this.activity = new WeakReference<>(activity);
-        }
-    }
-
-    abstract class MyOnClickListener implements OnClickListener {
-        @Override
-        final public void onClick(View v) {
-            if (!ActivityMain.this.layoutNumbersDraggable.isDragging()) {
-                myOnClick(v);
-            }
-        }
-
-        abstract void myOnClick(View v);
-    }
-
-    MyOnClickListener clickListenerDigitButtons = new MyOnClickListener() {
-        @Override
-        public void myOnClick(View view) {
-            int id = view.getId();
-            for (int i = 0; i < 10; ++i) {
-                if (id == digitButtonsIds[i]) {
-                    clickedDigit(i, true);
-                    break;
-                }
-            }
-        }
-    };
-
-    MyOnClickListener clickListenerOperations = new MyOnClickListener() {
-        @Override
-        public void myOnClick(View view) {
-            Operation operation = getOperationFromBtnId(view.getId());
-            if (operation != null) {
-                clickedOperation(operation);
-            } else {
-                Log.d(TAG, "Some button is not linked to any Operation");
-            }
-        }
-    };
-
-    private Operation getOperationFromBtnId(int id) {
-        for (Map.Entry<Operation, OperationData> dataEntry : operationsData.entrySet()) {
-            if (Arrays.asList(dataEntry.getValue().btnIds).contains(id)) {
-                return dataEntry.getKey();
-            }
-        }
-        return null;
-    }
-
-    MyThreadPoolExecutor threadPool;
-
-    private class OperationResult{
-        BigDecimal[] operands;
-        List<BigDecimal> results = new ArrayList<>(1);
-        String error = null;
-
-        OperationResult(BigDecimal[] operands) {
-//            this.operands = new BigDecimal[operands.length];
-//            System.arraycopy(operands, 0, this.operands, 0, operands.length);
-
-            this.operands = operands.clone();
-        }
-        
-        void add(BigDecimal number){
-            results.add(number);
-        }
-    }
-
     private class ThreadedOperation implements Callable<OperationResult>{
         private final OperationResult results;
         private final Operation operation;
         private final int arity;
         private final int numberOfArguments;
-        
+
         ThreadedOperation(OperationResult results, Operation operation, int arity, int numberOfArguments){
             this.results = new OperationResult(results.operands);
             this.operation = operation;
@@ -1103,6 +754,69 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
+    private abstract class MyOnClickListener implements OnClickListener {
+        @Override
+        final public void onClick(View v) {
+            if (!ActivityMain.this.layoutNumbersDraggable.isDragging()) {
+                myOnClick(v);
+            }
+        }
+
+        abstract void myOnClick(View v);
+    }
+
+    MyOnClickListener clickListenerDigitButtons = new MyOnClickListener() {
+        @Override
+        public void myOnClick(View view) {
+            int id = view.getId();
+            for (int i = 0; i < 10; ++i) {
+                if (id == digitButtonsIds[i]) {
+                    clickedDigit(i, true);
+                    break;
+                }
+            }
+        }
+    };
+
+    MyOnClickListener clickListenerOperations = new MyOnClickListener() {
+        @Override
+        public void myOnClick(View view) {
+            Operation operation = getOperationFromBtnId(view.getId());
+            if (operation != null) {
+                clickedOperation(operation);
+            } else {
+                Log.d(TAG, "Some button is not linked to any Operation");
+            }
+        }
+    };
+
+
+    private ValueAnimator errorBackgroundAnimator;
+
+    private LinkedList<BigDecimal> numberStack = new LinkedList<>();
+
+    private ViewedString editableNumber = new ViewedString();
+    private boolean deleteCharBeforeDecimalSeparator = false;
+    private boolean deleteCharBeforeScientificNotation = false;
+
+    private AngleMode angleMode;
+    private Integer[] digitButtonsIds;
+    private HistorySaver historySaver;
+
+    private DragNDropListView layoutNumbersDraggable;
+    private ImageView arrowUp, arrowDown;
+    private HorizontalScrollView scrollEditableNumber, scrollError;
+    private TextView tvEditableNumber, tvError, tvAngleMode;
+    private ViewAnimator switcherFunctions;
+
+    private NumberStackDraggableAdapter numberStackDraggableAdapter;
+
+    private StackAnimator stackAnimator;
+
+    private HashMap<Operation, OperationData> operationsData;
+
+    MyThreadPoolExecutor threadPool;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1422,6 +1136,17 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         super.onStop();
     }
 
+    @Override
+    public void onScrollChanged() {
+        layoutNumbersDraggable.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateArrowVisibility();
+            }
+        }, 280);
+    }
+
+
     private void enableKiller(){
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if(alarmManager != null) {
@@ -1464,8 +1189,8 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     }
 
     private Collection<BigDecimal> clearStack() {
-        Collection<BigDecimal> cleared = new ArrayList<>(numberStack);
-        numberStack.clear();
+        Collection<BigDecimal> cleared = numberStack;
+        numberStack = new LinkedList<>();
         numberStackDraggableAdapter.notifyDataSetChanged();
         return cleared;
     }
@@ -1479,7 +1204,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         addNumbers(Arrays.asList(numbers));
     }
 
-    private void addNumbers(Collection<BigDecimal> numbers) {
+    public void addNumbers(Collection<BigDecimal> numbers) {
         numberStack.addAll(numbers);
         numberStackDraggableAdapter.notifyDataSetChanged();
     }
@@ -1502,13 +1227,21 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    private BigDecimal[] popNumbers(int amount) {
+    public BigDecimal[] popNumbers(int amount) {
         BigDecimal[] numbers = new BigDecimal[amount];
         for (int i = amount - 1; i >= 0; i--) {
             numbers[i] = numberStack.removeLast();
         }
         numberStackDraggableAdapter.notifyDataSetChanged();
         return numbers;
+    }
+
+    public int getNumberStackSize(){
+        return numberStack.size();
+    }
+
+    public BigDecimal getNumberStackAt(int pos){
+        return numberStack.get(pos);
     }
 
     /**
@@ -1518,7 +1251,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
      *             inserting the new one
      * @return true if a new number has been built and inserted in the stack
      */
-    boolean addEditableToStack(UpdateStackFlag flag) throws NumberFormatException {
+    private boolean addEditableToStack(UpdateStackFlag flag) throws NumberFormatException {
         BigDecimal removed = null;
         if (flag == UpdateStackFlag.REMOVE_PREVIOUS) {
             removed = numberStack.removeLast();
@@ -1551,22 +1284,22 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         return false;
     }
 
-    void clickedUndo() {
+    private void clickedUndo() {
         historySaver.goBack();
     }
 
-    void clickedRedo() {
+    private void clickedRedo() {
         historySaver.goForward();
     }
 
-    boolean isEditableNumberInStack() {
+    private boolean isEditableNumberInStack() {
         return editableNumber.length() > 0 && !editableNumber.toString().equals("-");
         //Any other string (0. 0.2 1E 2.3E) must be in stack, but not "-"
     }
 
-    void enteredParsedNumber(String text, boolean save){
+    private void enteredParsedNumber(String text, boolean save){
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
-        simpleChange.tag = "Parsed: " + text;
+        simpleChange.setTag("Parsed: " + text);
 
         boolean removePrevious = isEditableNumberInStack();
         if (save && removePrevious) {
@@ -1578,7 +1311,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             boolean addedNumber = addEditableToStack(removePrevious ? UpdateStackFlag.REMOVE_PREVIOUS : UpdateStackFlag.KEEP_PREVIOUS);
             if (save) {
                 if (addedNumber) {
-                    simpleChange.redoNumbersSize = 1;
+                    simpleChange.setRedoNumbersSize(1);
                 }
                 historySaver.saveSimpleChange(simpleChange);
             }
@@ -1587,9 +1320,9 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    void clickedDigit(int digit, boolean save) {
+    private void clickedDigit(int digit, boolean save) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString(), MERGE_DIGITS);
-        simpleChange.tag = "Digit: " + digit;
+        simpleChange.setTag("Digit: " + digit);
 
         boolean removePrevious = isEditableNumberInStack();
         if (save && removePrevious) {
@@ -1601,7 +1334,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             boolean addedNumber = addEditableToStack(removePrevious ? UpdateStackFlag.REMOVE_PREVIOUS : UpdateStackFlag.KEEP_PREVIOUS);
             if (save) {
                 if (addedNumber) {
-                    simpleChange.redoNumbersSize = 1;
+                    simpleChange.setRedoNumbersSize(1);
                 }
                 historySaver.saveSimpleChange(simpleChange);
             }
@@ -1610,7 +1343,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    void clickedDecimal(boolean save) {
+    private void clickedDecimal(boolean save) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString(), MERGE_DECIMAL);
 
         boolean removePrevious = isEditableNumberInStack();
@@ -1645,14 +1378,14 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             boolean addedNumber = addEditableToStack(flagRemove);
             if (save) {
                 if (addedNumber) {
-                    simpleChange.redoNumbersSize = 1;
+                    simpleChange.setRedoNumbersSize(1);
                 }
                 historySaver.saveSimpleChange(simpleChange);
             }
         }
     }
 
-    void clickedScientificNotation(boolean save) {
+    private void clickedScientificNotation(boolean save) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString(), MERGE_E);
 
         boolean removePrevious = isEditableNumberInStack();
@@ -1687,14 +1420,14 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             boolean addedNumber = addEditableToStack(flagRemove);
             if (save) {
                 if (addedNumber) {
-                    simpleChange.redoNumbersSize = 1;
+                    simpleChange.setRedoNumbersSize(1);
                 }
                 historySaver.saveSimpleChange(simpleChange);
             }
         }
     }
 
-    void clickedMinus(boolean save) {
+    private void clickedMinus(boolean save) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString(), MERGE_MINUS);
 
         boolean removePrevious = isEditableNumberInStack();
@@ -1740,14 +1473,14 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         boolean addedNumber = addEditableToStack(flagRemove);
         if (save) {
             if (addedNumber) {
-                simpleChange.redoNumbersSize = 1;
+                simpleChange.setRedoNumbersSize(1);
             }
             historySaver.saveSimpleChange(simpleChange);
         }
 
     }
 
-    void clickedDelete(boolean save) {
+    private void clickedDelete(boolean save) {
         if (scrollError.getVisibility() == View.VISIBLE) {
             scrollError.setVisibility(GONE);
             scrollEditableNumber.setVisibility(View.VISIBLE);
@@ -1775,16 +1508,16 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             boolean addedNumber = addEditableToStack(flagRemove);
             if (save) {
                 if (addedNumber) {
-                    simpleChange.redoNumbersSize = 1;
+                    simpleChange.setRedoNumbersSize(1);
                 }
                 historySaver.saveSimpleChange(simpleChange);
             }
         }
     }
 
-    void clickedEnter(boolean save) {
+    private void clickedEnter(boolean save) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
-        simpleChange.tag = "Enter: " + editableNumber.toString();
+        simpleChange.setTag("Enter: " + editableNumber.toString());
 
         if (editableNumber.length() == 0) {
             // "" --> use stack instead of editableNumber, if possible
@@ -1794,7 +1527,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
                 stackAnimator.animate(numberStack.size() - 1);
                 stackAnimator.animate(numberStack.size() - 2);
                 if (save) {
-                    simpleChange.redoNumbersSize = 1;
+                    simpleChange.setRedoNumbersSize(1);
                 }
             }
         } else if (editableNumber.toString().equals("-")) {
@@ -1808,7 +1541,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    void clickedPopNumber(boolean save) {
+    private void clickedPopNumber(boolean save) {
         if (scrollError.getVisibility() == View.VISIBLE) {
             scrollError.setVisibility(GONE);
             scrollEditableNumber.setVisibility(View.VISIBLE);
@@ -1835,7 +1568,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         editableNumber.reset();
     }
 
-    void clickedClear(boolean save) {
+    private void clickedClear(boolean save) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
         Collection<BigDecimal> cleared = clearStack();
         if (save) {
@@ -1847,19 +1580,19 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         editableNumber.reset();
     }
 
-    void clickedStackNumber(boolean save, BigDecimal number) {
+    private void clickedStackNumber(boolean save, BigDecimal number) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
-        simpleChange.tag = "StackNumber: " + number.toString();
+        simpleChange.setTag("StackNumber: " + number.toString());
 
         editableNumber.set(number.toString());
         addEditableToStack(UpdateStackFlag.KEEP_PREVIOUS);
         if (save) {
-            simpleChange.redoNumbersSize = 1;
+            simpleChange.setRedoNumbersSize(1);
             historySaver.saveSimpleChange(simpleChange);
         }
     }
 
-    void clickedSwap(boolean save, int startPosition, int endPosition) {
+    public void clickedSwap(boolean save, int startPosition, int endPosition) {
         if (startPosition == -1 || endPosition == -1) {
             endPosition = numberStack.size() - 1;
             startPosition = endPosition - 1;
@@ -1881,14 +1614,15 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         numberStackDraggableAdapter.notifyDataSetChanged();
     }
 
-    void clickedOperation(Operation operation) {
+    private void clickedOperation(Operation operation) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
 
-        final int arity = operationsData.get(operation).arity;
+        final int arity = operationsData.get(operation).arity,
+                  availableArguments = numberStack.size();
         int numberOfArguments;
-        int availableArguments = numberStack.size();
-        boolean enoughArguments;
-        boolean editableInStack = isEditableNumberInStack();
+        boolean enoughArguments,
+                editableInStack = isEditableNumberInStack();
+
         editableNumber.reset();
 
         if (arity == ARITY_ALL) {
@@ -1918,8 +1652,8 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             // 1. The timeout is hardcoded
             // 2. the variables in & out are all mixed
             // 3. the code is pretty much unclear
-            // 4. a rare race condition is detected and unfixed
-            // 5. The long operation is abandoned in a zombie thread, wasting CPU & battery
+            // 4. a rare race condition is theorically detected and unfixed
+            // 5. Too long operations are abandoned in a zombie thread, wasting CPU & battery
             // 5.a Well, when the app goes to background, an alarm kills the app to free resources
             // TODO: Fix that race condition
 
@@ -1934,7 +1668,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             }catch(InterruptedException | ExecutionException | TimeoutException e) {
                 futureResult.cancel(true);
                 error = getString(R.string.longOperation);
-                Log.d(TAG, String.format("Operation too long. %d zombie threads will be killed when app is in background", threadPool.getActiveCount()));
+                Log.d(TAG, String.format("Operation too long. %d zombie threads will be killed when app goes to background", threadPool.getActiveCount()));
             }
 
             operands = operationResult.operands;
@@ -1947,7 +1681,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
                 for (BigDecimal operand : operands) {
                     simpleChange.addOld(operand);
                 }
-                simpleChange.redoNumbersSize = results.size();
+                simpleChange.setRedoNumbersSize(results.size());
                 historySaver.saveSimpleChange(simpleChange);
                 addNumbers(results);
 
@@ -1958,7 +1692,110 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    static private BigDecimal getHardcodedCosine(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException{
+    /**
+     * This is used to show 4.499999 as 4.500000, while internally it's still stored as 4.499999
+     *
+     * @param number
+     * @return
+     */
+    public String asString(BigDecimal number) {
+        int precision = number.precision();
+        if (precision >= GOOD_PRECISION) {
+            precision--;
+        }
+        return localizeDecimalSeparator(number.round(new MathContext(precision, ROUNDING_MODE)).toString());
+    }
+
+    String localizeDecimalSeparator(String str) {
+        char decimalSeparator = getResources().getString(R.string.decimalSeparator).charAt(0);
+        return str.replace('.', decimalSeparator);
+    }
+
+    public void resetEditableNumber(){
+        editableNumber.reset();
+    }
+
+    public void setEditableNumber(String number){
+        editableNumber.set(number);
+    }
+
+    public String getEditableNumberStr(){
+        return editableNumber.toString();
+    }
+
+    public BigDecimal numberStackRemove(int position) {
+        return numberStack.remove(position);
+    }
+
+    public void numberStackAdd(int position, BigDecimal number) {
+        numberStack.add(position, number);
+    }
+
+    public void notifyStackChanged(){
+        numberStackDraggableAdapter.notifyDataSetChanged();
+    }
+
+    private Operation getOperationFromBtnId(int id) {
+        for (Map.Entry<Operation, OperationData> dataEntry : operationsData.entrySet()) {
+            if (Arrays.asList(dataEntry.getValue().btnIds).contains(id)) {
+                return dataEntry.getKey();
+            }
+        }
+        return null;
+    }
+
+    private void switchAngleMode() {
+        if (angleMode == AngleMode.DEGREE) {
+            angleMode = AngleMode.RADIAN;
+        } else {
+            angleMode = AngleMode.DEGREE;
+        }
+        showAngleMode();
+    }
+
+    private void showAngleMode() {
+        tvAngleMode.setText(angleMode == AngleMode.DEGREE ? "D\nE\nG" : "R\nA\nD");
+    }
+
+    private void showError(String str) {
+        tvError.setText(getResources().getString(R.string.error) + ": " + str);
+        scrollError.setVisibility(View.VISIBLE);
+        scrollEditableNumber.setVisibility(GONE);
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            errorBackgroundAnimator.start();
+        }
+    }
+
+    private void updateArrowVisibility() {
+        // code taken from my fork of Anuto TD
+
+        final int numberViews = layoutNumbersDraggable.getChildCount();
+        if (numberViews <= 0) {
+            arrowUp.setVisibility(View.INVISIBLE);
+            arrowDown.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        final int firstVisibleNumber = layoutNumbersDraggable.getFirstVisiblePosition();
+        if (firstVisibleNumber == 0) {
+            arrowUp.setVisibility(layoutNumbersDraggable.getChildAt(0).getTop() < -20 ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            arrowUp.setVisibility(firstVisibleNumber > 0 ? View.VISIBLE : View.INVISIBLE);
+        }
+
+        final int stackSize = numberStack.size();
+        final int lastVisibleNumber = layoutNumbersDraggable.getLastVisiblePosition();
+        if (lastVisibleNumber == stackSize - 1) {
+            int marginFix = (int) getResources().getDimension(R.dimen.arrowMarginFix);
+            arrowDown.setVisibility(layoutNumbersDraggable.getChildAt(numberViews - 1).getBottom() > layoutNumbersDraggable.getHeight() + marginFix ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            arrowDown.setVisibility(lastVisibleNumber < stackSize - 1 ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+
+    private static BigDecimal getHardcodedCosine(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException{
         BigDecimal degrees = angle;
         if (angleMode == AngleMode.RADIAN) {
             degrees = toDegrees(angle);
@@ -1972,7 +1809,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    static private BigDecimal getHardcodedTangent(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException {
+    private static BigDecimal getHardcodedTangent(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException {
         BigDecimal degrees = angle;
         if (angleMode == AngleMode.RADIAN) {
             degrees = toDegrees(angle);
@@ -2005,18 +1842,14 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     }
 
     private static BigDecimal toDegrees(BigDecimal radians) {
-        return radians.multiply(new BigDecimal(180)).divide(BIG_PI, getGoodContext(radians));
+        return radians.multiply(new BigDecimal("57,2957795130823208768"), getGoodContext(radians));
     }
 
     private static BigDecimal toRadians(BigDecimal degrees) {
-        return degrees.multiply(BIG_PI).divide(new BigDecimal("180.000000"), getGoodContext(degrees));
+        return degrees.multiply(new BigDecimal("0.01745329251994329577"), getGoodContext(degrees));
     }
 
-    private static MathContext getGoodContext(BigDecimal number) {
-        return new MathContext(Math.max(GOOD_PRECISION, number.precision()), ROUNDING_MODE);
-    }
-
-    private static MathContext getGoodContext(BigDecimal[] operands) {
+    private static MathContext getGoodContext(BigDecimal... operands) {
         int precision = GOOD_PRECISION;
         for (int i = 0; i < operands.length; i++) {
             precision = Math.max(precision, operands[i].precision());
@@ -2024,49 +1857,15 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         return new MathContext(precision, ROUNDING_MODE);
     }
 
-    /**
-     * This is used to show 4.499999 as 4.500000, while internally it's still stored as 4.499999
-     *
-     * @param number
-     * @return
-     */
-    public String asString(BigDecimal number) {
-        int precision = number.precision();
-        if (precision >= GOOD_PRECISION) {
-            precision--;
+    private static ArrayList<String> buildStringArrayListNumbers(List<BigDecimal> numbers) {
+        ArrayList<String> stringNumbers = new ArrayList<String>();
+        for (BigDecimal num : numbers) {
+            stringNumbers.add(removeZeros(num.toString(), false, "."));
         }
-        return localizeDecimalSeparator(number.round(new MathContext(precision, ROUNDING_MODE)).toString());
+        return stringNumbers;
     }
 
-    String localizeDecimalSeparator(String str) {
-        char decimalSeparator = getResources().getString(R.string.decimalSeparator).charAt(0);
-        return str.replace('.', decimalSeparator);
-    }
-
-    private void switchAngleMode() {
-        if (angleMode == AngleMode.DEGREE) {
-            angleMode = AngleMode.RADIAN;
-        } else {
-            angleMode = AngleMode.DEGREE;
-        }
-        showAngleMode();
-    }
-
-    void showAngleMode() {
-        tvAngleMode.setText(angleMode == AngleMode.DEGREE ? "D\nE\nG" : "R\nA\nD");
-    }
-
-    void showError(String str) {
-        tvError.setText(getResources().getString(R.string.error) + ": " + str);
-        scrollError.setVisibility(View.VISIBLE);
-        scrollEditableNumber.setVisibility(GONE);
-
-        if (Build.VERSION.SDK_INT >= 11) {
-            errorBackgroundAnimator.start();
-        }
-    }
-
-    static String removeZeros(String string, boolean keepTrailingZeros, String decimalSeparator) {
+    private static String removeZeros(String string, boolean keepTrailingZeros, String decimalSeparator) {
         char decimalSeparatorChar = decimalSeparator.charAt(0);
         boolean keepRemoving = true;
         boolean scientific = false;
@@ -2115,58 +1914,11 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         return str.toString();
     }
 
-    static boolean lastCharIs(String s, char c) {
-        if (s.length() == 0) {
-            return false;
-        } else {
-            return s.charAt(s.length() - 1) == c;
-        }
+    private static boolean lastCharIs(String s, char c) {
+        return s.length() != 0 && s.charAt(s.length() - 1) == c;
     }
 
-    static ArrayList<String> buildStringArrayListNumbers(List<BigDecimal> numbers) {
-        ArrayList<String> stringNumbers = new ArrayList<String>();
-        for (BigDecimal num : numbers) {
-            stringNumbers.add(removeZeros(num.toString(), false, "."));
-        }
-        return stringNumbers;
-    }
 
-    @Override
-    public void onScrollChanged() {
-        layoutNumbersDraggable.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                updateArrowVisibility();
-            }
-        }, 280);
-    }
-
-    private void updateArrowVisibility() {
-        // code taken from my fork of Anuto TD
-
-        final int numberViews = layoutNumbersDraggable.getChildCount();
-        if (numberViews <= 0) {
-            arrowUp.setVisibility(View.INVISIBLE);
-            arrowDown.setVisibility(View.INVISIBLE);
-            return;
-        }
-
-        final int firstVisibleNumber = layoutNumbersDraggable.getFirstVisiblePosition();
-        if (firstVisibleNumber == 0) {
-            arrowUp.setVisibility(layoutNumbersDraggable.getChildAt(0).getTop() < -20 ? View.VISIBLE : View.INVISIBLE);
-        } else {
-            arrowUp.setVisibility(firstVisibleNumber > 0 ? View.VISIBLE : View.INVISIBLE);
-        }
-
-        final int stackSize = numberStack.size();
-        final int lastVisibleNumber = layoutNumbersDraggable.getLastVisiblePosition();
-        if (lastVisibleNumber == stackSize - 1) {
-            int marginFix = (int) getResources().getDimension(R.dimen.arrowMarginFix);
-            arrowDown.setVisibility(layoutNumbersDraggable.getChildAt(numberViews - 1).getBottom() > layoutNumbersDraggable.getHeight() + marginFix ? View.VISIBLE : View.INVISIBLE);
-        } else {
-            arrowDown.setVisibility(lastVisibleNumber < stackSize - 1 ? View.VISIBLE : View.INVISIBLE);
-        }
-    }
 
 }
 //TODO catch NumberFormatException in every addEditableToStack call

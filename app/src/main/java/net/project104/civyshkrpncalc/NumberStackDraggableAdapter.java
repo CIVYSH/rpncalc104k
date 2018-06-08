@@ -50,12 +50,12 @@ class NumberStackDraggableAdapter extends BaseAdapter implements DragNDropAdapte
 
     @Override
     public int getCount() {
-        return activityReference.get().numberStack.size();
+        return activityReference.get().getNumberStackSize();
     }
 
     @Override
     public Object getItem(int i) {
-        return activityReference.get().numberStack.get(i);
+        return activityReference.get().getNumberStackAt(i);
     }
 
     @Override
@@ -80,7 +80,7 @@ class NumberStackDraggableAdapter extends BaseAdapter implements DragNDropAdapte
         }
         viewHolder.position = position;
 
-        int size = activity.numberStack.size();
+        int size = activity.getNumberStackSize();
         String letter = null;
         if (position == size - 1) {
             letter = "x";
