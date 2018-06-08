@@ -20,9 +20,7 @@
 package net.project104.civyshkrpncalc;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,10 +82,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     final static int ARITY_ZERO_ONE = -2;// takes one number if it's being written by user
     final static int ARITY_N = -3;// takes N+1 numbers, let N be the first number in the stack
 
-    final static int GOOD_PRECISION = 10;
-    final static RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
-    final static MathContext DEFAULT_MATH_CONTEXT = new MathContext(GOOD_PRECISION, ROUNDING_MODE);
-
     final static String DEGREE_MODE_PARAM = "AngleMode";
     final static String NUMBER_STACK_PARAM = "NumberStack";
     final static String HISTORY_SAVER_PARAM = "HistorySaver";
@@ -102,10 +96,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
     enum UpdateStackFlag {
         KEEP_PREVIOUS, REMOVE_PREVIOUS
-    }
-
-    enum AngleMode {
-        DEGREE, RADIAN
     }
 
 
@@ -249,71 +239,50 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    private class ThreadedOperation implements Callable<OperationResult>{
-        private final OperationResult results;
+    private class ThreadedOperation implements Callable<OperationBundle>{
+        private final OperationBundle bundle;
         private final Operation operation;
         private final int arity;
         private final int numberOfArguments;
 
-        ThreadedOperation(OperationResult results, Operation operation, int arity, int numberOfArguments){
-            this.results = new OperationResult(results.operands);
+        ThreadedOperation(OperationBundle results, Operation operation, int arity, int numberOfArguments){
+            this.bundle = new OperationBundle(results.operands);
             this.operation = operation;
             this.arity = arity;
             this.numberOfArguments = numberOfArguments;
         }
 
-        Future<OperationResult> start(){
+        Future<OperationBundle> start(){
             return threadPool.submit(this);
         }
 
         @Override
-        public OperationResult call() {
+        public OperationBundle call() {
             try {
                 if (arity == ARITY_ALL) {
-                    BigDecimal result;
                     switch (operation) {
-                        case SUMMATION:
-                            result = results.operands[0];
-                            for (int i = 1; i < numberOfArguments; ++i) {
-                                result = result.add(results.operands[i]);
-                            }
-                            results.add(result);
-                            break;
-                        case MEAN:
-                            result = results.operands[0];
-                            int precision = 1;
-                            for (int i = 1; i < numberOfArguments; ++i) {
-                                precision = Math.max(precision, results.operands[i].precision());
-                                result = result.add(results.operands[i]);
-                            }
-                            precision = Math.max(precision, GOOD_PRECISION);
-                            MathContext mathContext = new MathContext(precision, ROUNDING_MODE);
-                            result = result.divide(new BigDecimal(numberOfArguments), mathContext);
-                            results.add(result);
-                            break;
-                        default:
-                            results.error = getResources().getString(R.string.operationNotImplemented);
-                            break;
+                        case SUMMATION:         calc.summation(bundle);break;
+                        case MEAN:              calc.mean(bundle);break;
+                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
                     }
                 } else if (arity == ARITY_ZERO_ONE) {
-                    BigDecimal result = (operation == Operation.CONSTANTPI ? BIG_PI : (operation == Operation.CONSTANTEULER ? BIG_EULER : BIG_PHI)).round(DEFAULT_MATH_CONTEXT);
-                    if (results.operands.length == 1) {
-                        result = result.multiply(results.operands[0], getGoodContext(results.operands[0]));
+                    switch (operation){
+                        case CONSTANTPI:        calc.pi(bundle); break;
+                        case CONSTANTPHI:       calc.phi(bundle); break;
+                        case CONSTANTEULER:     calc.euler(bundle); break;
+                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED; break;
                     }
-                    results.add(result);
                 } else if (arity == ARITY_N) {
-                    int userNumberOperands;
                     try {
-                        long nLong = results.operands[0].longValueExact();
+                        long nLong = bundle.operands[0].longValueExact();
                         if (nLong <= Integer.MAX_VALUE) {
-                            userNumberOperands = (int) nLong;
-
+                            int userNumberOperands = (int) nLong;
                             if (numberStack.size() < userNumberOperands) {
-                                results.error = getResources().getString(R.string.notEnoughArguments);
+                                bundle.error = CalculatorError.NOT_ENOUGH_ARGS;
                             } else {
                                 //pop N more results.operands
-                                Collection<BigDecimal> fullOperands = new ArrayList<>(userNumberOperands + 1);
-                                fullOperands.add(results.operands[0]);
+                                ArrayList<BigDecimal> fullOperands = new ArrayList<>(userNumberOperands + 1);
+                                fullOperands.add(bundle.operands[0]);
                                 if(!Thread.currentThread().isInterrupted()){
                                     //TODO this doesn't really protects from a weird race condition where the task can
                                     //be cancelled in this right moment (after if()) and it'll still pop
@@ -324,433 +293,81 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
                                     //that it can't complete before the task times out.
                                     // That means one whole second when I wrote this comment.
                                     fullOperands.addAll(Arrays.asList(popNumbers(userNumberOperands)));
-                                    results.operands = fullOperands.toArray(new BigDecimal[userNumberOperands + 1]);
-                                    BigDecimal result = BigDecimal.ZERO;
+                                    bundle.operands = fullOperands.toArray(new BigDecimal[userNumberOperands + 1]);
                                     switch (operation) {
-                                        case SUMMATION_N:
-                                            for (int i = 1; i <= userNumberOperands; i++) {
-                                                result = result.add(results.operands[i]);
-                                            }
-                                            break;
-                                        case MEAN_N:
-                                            for (int i = 1; i <= userNumberOperands; i++) {
-                                                result = result.add(results.operands[i]);
-                                            }
-                                            result = result.divide(new BigDecimal(userNumberOperands), getGoodContext(results.operands));
-                                            break;
-                                        default:
-                                            results.error = getResources().getString(R.string.operationNotImplemented);
-                                            break;
+                                        case SUMMATION_N:   calc.summationN(bundle);break;
+                                        case MEAN_N:        calc.meanN(bundle);break;
+                                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
                                     }
-                                    results.add(result);
                                 }else{
                                     //noop; The result won't be used, there's no need to set the error
                                 }
                             }
                         } else {
-                            results.error = getResources().getString(R.string.tooManyArguments);
+                            bundle.error = CalculatorError.TOO_MANY_ARGS;
                         }
                     }catch(ArithmeticException e) {
-                        results.error = getResources().getString(R.string.nIsNotInteger);
+                        bundle.error = CalculatorError.LAST_NOT_INT;
                     }
                 } else if (arity == 0) {
-                    BigDecimal result;
                     switch (operation) {
-                        case RANDOM:
-                            result = new BigDecimal(Math.random());
-                            results.add(result);
-                            break;
-                        default:
-                            results.error = getResources().getString(R.string.operationNotImplemented);
-                            break;
+                        case RANDOM: calc.random(bundle);break;
+                        default: bundle.error = CalculatorError.NOT_IMPLEMENTED; break;
                     }
                 } else if (arity == 1) {
-                    BigDecimal result;
-                    BigDecimal radians;
                     switch (operation) {
-                        case INVERSION:
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) == 0) {
-                                results.error = getResources().getString(R.string.divisionByZero);
-                            } else {
-                                result = BigDecimal.ONE.divide(results.operands[0], DEFAULT_MATH_CONTEXT);
-                                results.add(result);
-                            }
-                            break;
-                        case SQUARE:
-                            try {
-                                result = results.operands[0].pow(2, getGoodContext(results.operands[0]));
-                                results.add(result);
-                            }catch(ArithmeticException e) {
-                                results.error = getString(R.string.numberTooBig);
-                            }
-                            break;
-                        case NEGATIVE:
-                            result = results.operands[0].negate();
-                            results.add(result);
-                            break;
-                        case SQUAREROOT:
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) < 0) {
-                                results.error = getResources().getString(R.string.negativeSquareRoot);
-                            } else if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.sqrt(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                results.add(result);
-                            }
-                            break;
-                        case SINE:
-                            radians = results.operands[0];
-                            if (angleMode == AngleMode.DEGREE) {
-                                radians = toRadians(results.operands[0]);
-                            }
-                            if (doubleIsInfinite(radians)) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.sin(radians.doubleValue()), getGoodContext(results.operands[0]));
-                                results.add(result);
-                            }
-                            break;
-                        case COSINE:
-                            try {
-                                result = getHardcodedCosine(results.operands[0], angleMode);
-                                results.add(result);
-                            }catch(IllegalArgumentException e) {
-                                radians = results.operands[0];
-                                if (angleMode == AngleMode.DEGREE) {
-                                    radians = toRadians(results.operands[0]);
-                                }
-                                if (doubleIsInfinite(radians)) {
-                                    results.error = getResources().getString(R.string.numberTooBig);
-                                } else {
-                                    result = new BigDecimal(Math.cos(radians.doubleValue()), getGoodContext(results.operands[0]));
-                                    //                            result = new BigDecimal(Math.cos(radians.doubleValue()), getGoodContext(results.operands[0])).setScale(9, RoundingMode.HALF_UP);
-                                    results.add(result);
-                                }
-                            }
-                            break;
-                        case TANGENT:
-                            try {
-                                result = getHardcodedTangent(results.operands[0], angleMode);
-                                if (result != null) {
-                                    results.add(result);
-                                } else {
-                                    results.error = getString(R.string.tangentOutOfDomain);
-                                }
-                            }catch(IllegalArgumentException e) {
-                                radians = results.operands[0];
-                                if (angleMode == AngleMode.DEGREE) {
-                                    radians = toRadians(results.operands[0]);
-                                }
-                                if (doubleIsInfinite(radians)) {
-                                    results.error = getResources().getString(R.string.numberTooBig);
-                                } else {
-                                    result = new BigDecimal(Math.tan(radians.doubleValue()), getGoodContext(results.operands[0])).setScale(9, RoundingMode.HALF_UP);
-                                    results.add(result);
-                                }
-                            }
-                            break;
-                        case ARCSINE:
-                            if (results.operands[0].compareTo(BigDecimal.ONE.negate()) < 0
-                                    || results.operands[0].compareTo(BigDecimal.ONE) > 0) {
-                                results.error = getResources().getString(R.string.arcsineOutOfRange);
-                            } else if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.asin(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                if (angleMode == AngleMode.DEGREE) {
-                                    result = toDegrees(result);
-                                }
-                                results.add(result);
-                            }
-                            break;
-                        case ARCCOSINE:
-                            if (results.operands[0].compareTo(new BigDecimal("-1.0")) < 0
-                                    || results.operands[0].compareTo(new BigDecimal("1.0")) > 0) {
-                                results.error = getResources().getString(R.string.arccosineOutOfRange);
-                            } else if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.acos(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                if (angleMode == AngleMode.DEGREE) {
-                                    result = toDegrees(result);
-                                }
-                                results.add(result);
-                            }
-                            break;
-                        case ARCTANGENT:
-                            if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.atan(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                if (angleMode == AngleMode.DEGREE) {
-                                    result = toDegrees(result);
-                                    results.add(result);
-                                }
-                            }
-                            break;
-                        case SINE_H:
-                            if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                try {
-                                    result = new BigDecimal(Math.sinh(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                    results.add(result);
-                                }catch(NumberFormatException e) {
-                                    results.error = getString(R.string.numberTooBig);
-                                }
-                            }
-                            break;
-                        case COSINE_H:
-                            if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                try {
-                                    result = new BigDecimal(Math.cosh(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                    results.add(result);
-                                }catch(NumberFormatException e) {
-                                    results.error = getString(R.string.numberTooBig);
-                                }
-                            }
-                            break;
-                        case TANGENT_H:
-                            if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                try {
-                                    result = new BigDecimal(Math.tanh(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                    results.add(result);
-                                }catch(NumberFormatException e) {
-                                    results.error = getString(R.string.numberTooBig);
-                                }
-                            }
-                            break;
-                        case LOG10:
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) <= 0) {
-                                results.error = getResources().getString(R.string.logOutOfRange);
-                            } else if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.log10(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                results.add(result);
-                            }
-                            break;
-                        case LOGN:
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) <= 0) {
-                                results.error = getResources().getString(R.string.logOutOfRange);
-                            } else if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                result = new BigDecimal(Math.log(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                results.add(result);
-                            }
-                            break;
-                        case EXPONENTIAL:
-                            if (doubleIsInfinite(results.operands[0])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                try {
-                                    result = new BigDecimal(Math.exp(results.operands[0].doubleValue()), getGoodContext(results.operands[0]));
-                                    results.add(result);
-                                }catch(NumberFormatException e) {
-                                    results.error = getResources().getString(R.string.numberTooBig);
-                                }
-                            }
-                            break;
-                        case FACTORIAL:
-                            try {
-                                if (results.operands[0].compareTo(new BigDecimal(1000)) > 0) {
-                                    results.error = getResources().getString(R.string.numberTooBig);
-                                } else {
-                                    BigInteger operand = results.operands[0].toBigIntegerExact();
-                                    result = new BigDecimal(factorial(operand));
-                                    results.add(result);
-                                }
-                            }catch(ArithmeticException e) {
-                                results.error = getResources().getString(R.string.wrongFactorial);
-                            }
-                            break;
-                        case DEGTORAD:
-                            result = toRadians(results.operands[0]);
-                            results.add(result);
-                            break;
-                        case RADTODEG:
-                            result = toDegrees(results.operands[0]);
-                            results.add(result);
-                            break;
-                        case FLOOR:
-                            results.add(results.operands[0].setScale(0, RoundingMode.FLOOR));
-                            break;
-                        case ROUND:
-                            results.add(results.operands[0].setScale(0, RoundingMode.HALF_UP));
-                            break;
-                        case CEIL:
-                            results.add(results.operands[0].setScale(0, RoundingMode.CEILING));
-                            break;
-                        case CIRCLE_SURFACE:
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) < 0) {
-                                results.error = getResources().getString(R.string.negativeRadius);
-                            } else {
-                                try {
-                                    result = results.operands[0].pow(2).multiply(BIG_PI, getGoodContext(results.operands[0]));
-                                    results.add(result);
-                                }catch(ArithmeticException e) {
-                                    results.error = getString(R.string.numberTooBig);
-                                }
-                            }
-                            break;
-                        default:
-                            results.error = getResources().getString(R.string.operationNotImplemented);
-                            break;
+                        case INVERSION:             calc.inversion(bundle); break;
+                        case SQUARE:                calc.square(bundle); break;
+                        case NEGATIVE:              calc.negative(bundle); break;
+                        case SQUAREROOT:            calc.squareRoot(bundle); break;
+                        case SINE:                  calc.sine(bundle); break;
+                        case COSINE:                calc.cosine(bundle); break;
+                        case TANGENT:               calc.tangent(bundle); break;
+                        case ARCSINE:               calc.arcsine(bundle); break;
+                        case ARCCOSINE:             calc.arccosine(bundle); break;
+                        case ARCTANGENT:            calc.arctangent(bundle); break;
+                        case SINE_H:                calc.sineH(bundle); break;
+                        case COSINE_H:              calc.cosineH(bundle); break;
+                        case TANGENT_H:             calc.tangentH(bundle); break;
+                        case LOG10:                 calc.log10(bundle); break;
+                        case LOGN:                  calc.logN(bundle); break;
+                        case EXPONENTIAL:           calc.exponential(bundle); break;
+                        case FACTORIAL:             calc.factorial(bundle); break;
+                        case DEGTORAD:              calc.deg2rad(bundle); break;
+                        case RADTODEG:              calc.rad2deg(bundle); break;
+                        case FLOOR:                 calc.floor(bundle); break;
+                        case ROUND:                 calc.round(bundle); break;
+                        case CEIL:                  calc.ceil(bundle); break;
+                        case CIRCLE_SURFACE:        calc.circleSurface(bundle); break;
+                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED; break;
                     }
                 } else if (arity == 2) {
                     switch (operation) {
-                        case ADDITION:
-                            results.add(results.operands[0].add(results.operands[1]));
-                            break;
-                        case MULTIPLICATION:
-                            results.add(results.operands[0].multiply(results.operands[1]));
-                            break;
-                        case EXPONENTIATION:
-                            //y^x; x is results.operands[1]; y is results.operands[0]
-                            if (doubleIsInfinite(results.operands[0]) || doubleIsInfinite(results.operands[1])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else if (results.operands[0].compareTo(BigDecimal.ZERO) > 0) {
-                                try {
-                                    BigDecimal result = new BigDecimal(Math.pow(results.operands[0].doubleValue(), results.operands[1].doubleValue()), getGoodContext(results.operands));
-                                    results.add(result);
-                                }catch(NumberFormatException e) {
-                                    results.error = getResources().getString(R.string.numberTooBig);
-                                }
-                            } else {
-                                try {
-                                    BigInteger exponent = results.operands[1].toBigIntegerExact();
-                                    BigDecimal result = new BigDecimal(Math.pow(results.operands[0].doubleValue(), exponent.doubleValue()));
-                                    results.add(result);
-                                }catch(ArithmeticException e) {
-                                    results.error = getResources().getString(R.string.negativeBaseExponentiation);
-                                }catch(NumberFormatException e) {
-                                    results.error = getResources().getString(R.string.numberTooBig);
-                                }
-                            }
-                            break;
-                        case SUBTRACTION:
-                            results.add(results.operands[0].subtract(results.operands[1]));
-                            break;
-                        case DIVISION:
-                            if (results.operands[1].compareTo(BigDecimal.ZERO) == 0) {
-                                results.error = getResources().getString(R.string.divisionByZero);
-                            } else {
-                                results.add(results.operands[0].divide(results.operands[1], getGoodContext(results.operands)));
-                            }
-                            break;
-                        case ROOTYX:
-                            //x^(1/y); x is results.operands[1]; y is results.operands[0]
-                            if (doubleIsInfinite(results.operands[1])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else if (results.operands[0].compareTo(BigDecimal.ZERO) == 0) {
-                                results.error = getString(R.string.rootIndexZero);
-                            } else if (results.operands[1].compareTo(BigDecimal.ZERO) > 0) {
-                                results.add(new BigDecimal(
-                                        Math.pow(results.operands[1].doubleValue(), BigDecimal.ONE.divide(results.operands[0], DEFAULT_MATH_CONTEXT).doubleValue()),
-                                        getGoodContext(results.operands)));
-                            } else {
-                                results.error = getResources().getString(R.string.negativeRadicand);
-                            }
-                            break;
-                        case LOGYX:
-                            //log(x) in base y; x is results.operands[1]; y is results.operands[0]
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) <= 0
-                                    || results.operands[1].compareTo(new BigDecimal("0.0")) <= 0) {
-                                results.error = getResources().getString(R.string.logOutOfRange);
-                            } else if (doubleIsInfinite(results.operands[0]) || doubleIsInfinite(results.operands[1])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else {
-                                BigDecimal divisor = new BigDecimal(Math.log(results.operands[0].doubleValue()));
-                                if (divisor.compareTo(BigDecimal.ZERO) == 0) {
-                                    results.error = getString(R.string.logBaseIsOne);
-
-                                } else {
-                                    results.add(new BigDecimal(Math.log(results.operands[1].doubleValue())).
-                                            divide(divisor, getGoodContext(results.operands)));
-                                }
-                            }
-                            break;
-                        case HYPOTENUSE_PYTHAGORAS:
-                            if (doubleIsInfinite(results.operands[0]) || doubleIsInfinite(results.operands[1])) {
-                                results.error = getResources().getString(R.string.numberTooBig);
-                            } else if (results.operands[0].compareTo(BigDecimal.ZERO) < 0 || results.operands[1].compareTo(BigDecimal.ZERO) < 0) {
-                                results.error = getResources().getString(R.string.sideCantBeNegative);
-                            } else {
-                                results.add(results.operands[0]);
-                                results.add(results.operands[1]);
-                                results.add(new BigDecimal(
-                                        Math.hypot(results.operands[0].doubleValue(), results.operands[1].doubleValue()),
-                                        getGoodContext(results.operands)));//TODO don't use Math.hypot and avoid .doubleValue()
-                            }
-                            break;
-                        case LEG_PYTHAGORAS:
-                            if (results.operands[0].compareTo(BigDecimal.ZERO) < 0 || results.operands[1].compareTo(BigDecimal.ZERO) < 0) {
-                                results.error = getResources().getString(R.string.sideCantBeNegative);
-                            } else {
-                                BigDecimal hyp = results.operands[0].max(results.operands[1]);
-                                BigDecimal leg = results.operands[0].min(results.operands[1]);
-                                BigDecimal subtract = hyp.pow(2).subtract(leg.pow(2));
-                                if (doubleIsInfinite(subtract)) {
-                                    results.error = getString(R.string.numberTooBig);
-                                } else {
-                                    results.add(results.operands[0]);
-                                    results.add(results.operands[1]);
-                                    results.add(new BigDecimal(Math.sqrt(subtract.doubleValue()), getGoodContext(results.operands)));
-                                }
-                            }
-                            break;
-                        default:
-                            results.error = getResources().getString(R.string.operationNotImplemented);
-                            break;
+                        case ADDITION:              calc.addition(bundle);break;
+                        case MULTIPLICATION:        calc.multiplication(bundle);break;
+                        case EXPONENTIATION:        calc.exponentiation(bundle);break;
+                        case SUBTRACTION:           calc.subtraction(bundle);break;
+                        case DIVISION:              calc.joyDivision(bundle);break;
+                        case ROOTYX:                calc.rootYX(bundle);break;
+                        case LOGYX:                 calc.logYX(bundle);break;
+                        case HYPOTENUSE_PYTHAGORAS: calc.hypotenusePythagoras(bundle);break;
+                        case LEG_PYTHAGORAS:        calc.legPythagoras(bundle);break;
+                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
                     }
                 } else if (arity == 3) {
                     switch (operation) {
-                        case TRIANGLE_SURFACE:
-                            BigDecimal p = results.operands[0].add(results.operands[1]).add(results.operands[2]).divide(new BigDecimal(2), DEFAULT_MATH_CONTEXT);
-                            BigDecimal q = p.multiply(p.subtract(results.operands[0]))
-                                    .multiply(p.subtract(results.operands[1]))
-                                    .multiply(p.subtract(results.operands[2]));
-                            if (q.compareTo(BigDecimal.ZERO) < 0) {
-                                results.error = getResources().getString(R.string.notATriangle);
-                            } else if (doubleIsInfinite(q)) {
-                                results.error = getString(R.string.numberTooBig);
-                            } else {
-                                results.add(new BigDecimal(Math.sqrt(q.doubleValue()), getGoodContext(results.operands)));
-                            }
-                            break;
-                        case QUARATIC_EQUATION:
-                            //0=ax2+bx+c, a==z==op[0]; b==y==op[1]; c==x==op[2]
-                            BigDecimal a = results.operands[0];
-                            BigDecimal b = results.operands[1];
-                            BigDecimal c = results.operands[2];
-                            BigDecimal radicand = b.pow(2).subtract(a.multiply(c).multiply(new BigDecimal(4)));
-                            if (doubleIsInfinite(radicand)) {
-                                results.error = getString(R.string.numberTooBig);
-                            } else if (radicand.compareTo(BigDecimal.ZERO) < 0) {
-                                results.error = getString(R.string.complexNumber);
-                            } else {
-                                BigDecimal root = new BigDecimal(Math.sqrt(radicand.doubleValue()));
-                                results.add(root.subtract(b).divide(a.multiply(new BigDecimal(2)), DEFAULT_MATH_CONTEXT));
-                                results.add(root.negate().subtract(b).divide(a.multiply(new BigDecimal(2)), DEFAULT_MATH_CONTEXT));
-                            }
-                            break;
-                        default:
-                            results.error = getResources().getString(R.string.operationNotImplemented);
-                            break;
+                        case TRIANGLE_SURFACE:      calc.triangleSurface(bundle);break;
+                        case QUARATIC_EQUATION:     calc.quadraticEquation(bundle);break;
+                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
                     }
                 } else {
-                    results.error = getResources().getString(R.string.operationNotImplemented);
+                    bundle.error = CalculatorError.NOT_IMPLEMENTED;
                 }
             }catch(ArithmeticException e) {
-                results.error = getString(R.string.numberTooBig);
+                bundle.error = CalculatorError.NOT_IMPLEMENTED;
             }
 
-            return results;
+            return bundle;
         }
     }
 
@@ -794,12 +411,13 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     private ValueAnimator errorBackgroundAnimator;
 
     private LinkedList<BigDecimal> numberStack = new LinkedList<>();
+    private Calculator calc = new Calculator();
 
     private ViewedString editableNumber = new ViewedString();
     private boolean deleteCharBeforeDecimalSeparator = false;
     private boolean deleteCharBeforeScientificNotation = false;
 
-    private AngleMode angleMode;
+
     private Integer[] digitButtonsIds;
     private HistorySaver historySaver;
 
@@ -844,7 +462,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             }
         });
 
-        angleMode = AngleMode.DEGREE;
+        calc.setAngleMode(AngleMode.DEGREE);
         showAngleMode();
 
         operationsData = new HashMap<>(Operation.values().length);
@@ -1116,7 +734,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         ArrayList<String> numbers = buildStringArrayListNumbers(numberStack);
         saver.putStringArrayList(NUMBER_STACK_PARAM, numbers);
         saver.putString(EDITABLE_NUMBER_PARAM, editableNumber.toString());
-        saver.putBoolean(DEGREE_MODE_PARAM, angleMode == AngleMode.DEGREE);
+        saver.putBoolean(DEGREE_MODE_PARAM, calc.getAngleMode() == AngleMode.DEGREE);
         saver.putSerializable(HISTORY_SAVER_PARAM, historySaver);
         saver.putInt(SWITCHER_INDEX_PARAM, switcherFunctions.getDisplayedChild());
         super.onSaveInstanceState(saver);
@@ -1177,7 +795,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
         addNumbers(numbers);
         editableNumber.set(saved.getString(EDITABLE_NUMBER_PARAM));
-        angleMode = saved.getBoolean(DEGREE_MODE_PARAM) ? AngleMode.DEGREE : AngleMode.RADIAN;
+        calc.setAngleMode(saved.getBoolean(DEGREE_MODE_PARAM) ? AngleMode.DEGREE : AngleMode.RADIAN);
         showAngleMode();
 
         historySaver = (HistorySaver) saved.getSerializable(HISTORY_SAVER_PARAM);
@@ -1657,22 +1275,24 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             // 5.a Well, when the app goes to background, an alarm kills the app to free resources
             // TODO: Fix that race condition
 
-            OperationResult operationResult = new OperationResult(operands);
-            ThreadedOperation operationTask = new ThreadedOperation(operationResult, operation, arity, numberOfArguments);
-            Future<OperationResult> futureResult = operationTask.start();
+            OperationBundle operationBundle = new OperationBundle(operands);
+            ThreadedOperation operationTask = new ThreadedOperation(operationBundle, operation, arity, numberOfArguments);
+            Future<OperationBundle> futureResult = operationTask.start();
 
-            String error;
+            String error = null;
             try {
-                operationResult = futureResult.get(1, TimeUnit.SECONDS);
-                error = operationResult.error;
+                operationBundle = futureResult.get(1, TimeUnit.SECONDS);
+                if(operationBundle.error != null) {
+                    error = getString(CalculatorError.getRStringId(operationBundle.error));
+                }
             }catch(InterruptedException | ExecutionException | TimeoutException e) {
                 futureResult.cancel(true);
                 error = getString(R.string.longOperation);
                 Log.d(TAG, String.format("Operation too long. %d zombie threads will be killed when app goes to background", threadPool.getActiveCount()));
             }
 
-            operands = operationResult.operands;
-            List<BigDecimal> results = operationResult.results;
+            operands = operationBundle.operands;
+            List<BigDecimal> results = operationBundle.results;
 
             if (error != null) {
                 showError(error);
@@ -1700,10 +1320,10 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
      */
     public String asString(BigDecimal number) {
         int precision = number.precision();
-        if (precision >= GOOD_PRECISION) {
+        if (precision >= Calculator.GOOD_PRECISION) {
             precision--;
         }
-        return localizeDecimalSeparator(number.round(new MathContext(precision, ROUNDING_MODE)).toString());
+        return localizeDecimalSeparator(number.round(new MathContext(precision, Calculator.ROUNDING_MODE)).toString());
     }
 
     String localizeDecimalSeparator(String str) {
@@ -1745,16 +1365,16 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     }
 
     private void switchAngleMode() {
-        if (angleMode == AngleMode.DEGREE) {
-            angleMode = AngleMode.RADIAN;
+        if (calc.getAngleMode() == AngleMode.DEGREE) {
+            calc.setAngleMode(AngleMode.RADIAN);
         } else {
-            angleMode = AngleMode.DEGREE;
+            calc.setAngleMode(AngleMode.DEGREE);
         }
         showAngleMode();
     }
 
     private void showAngleMode() {
-        tvAngleMode.setText(angleMode == AngleMode.DEGREE ? "D\nE\nG" : "R\nA\nD");
+        tvAngleMode.setText(calc.getAngleMode() == AngleMode.DEGREE ? "D\nE\nG" : "R\nA\nD");
     }
 
     private void showError(String str) {
@@ -1794,68 +1414,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-
-    private static BigDecimal getHardcodedCosine(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException{
-        BigDecimal degrees = angle;
-        if (angleMode == AngleMode.RADIAN) {
-            degrees = toDegrees(angle);
-        }
-
-        BigDecimal remainder = degrees.abs().remainder(new BigDecimal(360), getGoodContext(angle));
-        if(remainder.compareTo(new BigDecimal(90)) == 0 || remainder.compareTo(new BigDecimal(270)) == 0){
-            return BigDecimal.ZERO;
-        }else{
-            throw new IllegalArgumentException();
-        }
-    }
-
-    private static BigDecimal getHardcodedTangent(BigDecimal angle, AngleMode angleMode) throws IllegalArgumentException {
-        BigDecimal degrees = angle;
-        if (angleMode == AngleMode.RADIAN) {
-            degrees = toDegrees(angle);
-        }
-
-        BigDecimal remainder = degrees.abs().remainder(new BigDecimal(360), getGoodContext(angle)).setScale(9, RoundingMode.HALF_UP);
-        if(remainder.compareTo(new BigDecimal(90)) == 0 || remainder.compareTo(new BigDecimal(270)) == 0){
-            return null;
-        }else{
-            throw new IllegalArgumentException();
-        }
-    }
-
-    private static boolean doubleIsInfinite(BigDecimal number) {
-        return number.doubleValue() == Double.NEGATIVE_INFINITY || number.doubleValue() == Double.POSITIVE_INFINITY;
-    }
-
-    private static BigInteger factorial(BigInteger operand) {
-        if (operand.compareTo(BigInteger.ZERO) < 0) {
-            throw new ArithmeticException("Negative factorial");
-        } else if (operand.compareTo(BigInteger.ZERO) == 0) {
-            return BigInteger.ONE;
-        } else {
-            BigInteger result = BigInteger.ONE;
-            for (BigInteger i = operand; i.compareTo(BigInteger.ONE) > 0; i = i.subtract(BigInteger.ONE)) {
-                result = result.multiply(i);
-            }
-            return result;
-        }
-    }
-
-    private static BigDecimal toDegrees(BigDecimal radians) {
-        return radians.multiply(new BigDecimal("57,2957795130823208768"), getGoodContext(radians));
-    }
-
-    private static BigDecimal toRadians(BigDecimal degrees) {
-        return degrees.multiply(new BigDecimal("0.01745329251994329577"), getGoodContext(degrees));
-    }
-
-    private static MathContext getGoodContext(BigDecimal... operands) {
-        int precision = GOOD_PRECISION;
-        for (int i = 0; i < operands.length; i++) {
-            precision = Math.max(precision, operands[i].precision());
-        }
-        return new MathContext(precision, ROUNDING_MODE);
-    }
 
     private static ArrayList<String> buildStringArrayListNumbers(List<BigDecimal> numbers) {
         ArrayList<String> stringNumbers = new ArrayList<String>();
