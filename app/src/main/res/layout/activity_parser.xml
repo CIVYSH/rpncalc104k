@@ -25,7 +25,7 @@
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:ems="10"
         android:gravity="center_horizontal"
         android:inputType="textNoSuggestions"
@@ -37,24 +37,54 @@
         android:id="@+id/butDelete"
         style="@style/buttonStyle.Control.Pop"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginLeft="32dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:src="@drawable/ic_cancel"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etInput" />
+
+    <Button
+        android:id="@+id/butToogleInfo"
+        style="@style/buttonStyle.Control"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:text="..."
+        app:layout_constraintEnd_toStartOf="@+id/butAccept"
+        app:layout_constraintStart_toEndOf="@+id/butDelete"
         app:layout_constraintTop_toBottomOf="@+id/etInput" />
 
     <ImageButton
         android:id="@+id/butAccept"
         style="@style/buttonStyle.Control.Enter"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
+        android:clickable="false"
         android:src="@drawable/ic_accept"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etInput"
-        android:clickable="false"/>
+        app:layout_constraintTop_toBottomOf="@+id/etInput" />
+
+    <TextView
+        android:id="@+id/tvInfoFunctions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/butAccept" />
 </android.support.constraint.ConstraintLayout>

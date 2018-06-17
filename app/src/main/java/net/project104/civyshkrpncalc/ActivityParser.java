@@ -8,17 +8,20 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import net.project104.infixparser.Calculator;
+import net.project104.infixparser.Operator;
 import net.project104.infixparser.RawText;
 
 public class ActivityParser extends Activity {
 
     private ImageButton btDelete, btAccept;
-    private TextView tvResult;
+    private Button btToogleInfo;
+    private TextView tvResult, tvInfoFunctions;
     private EditText etInput;
     private Calculator calc;
 
@@ -42,8 +45,17 @@ public class ActivityParser extends Activity {
 
         btDelete = (ImageButton) findViewById(R.id.butDelete);
         btAccept = (ImageButton) findViewById(R.id.butAccept);
+        btToogleInfo = (Button) findViewById(R.id.butToogleInfo);
         tvResult = (TextView) findViewById(R.id.tvResult);
+        tvInfoFunctions = (TextView) findViewById(R.id.tvInfoFunctions);
         etInput = (EditText) findViewById(R.id.etInput);
+
+        StringBuilder infoFunctions = new StringBuilder();
+        for(String name : Operator.functionNames){
+            infoFunctions.append(name);
+            infoFunctions.append(" ");
+        }
+        tvInfoFunctions.setText(infoFunctions.subSequence(0, infoFunctions.length()-1));
 
         btDelete.setOnClickListener(deleteListener);
 
@@ -59,6 +71,14 @@ public class ActivityParser extends Activity {
                     setResult(Activity.RESULT_OK, returnIntent);
                 }
                 finish();
+            }
+        });
+
+        btToogleInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tvInfoFunctions.setVisibility(tvInfoFunctions.getVisibility() == View.VISIBLE ?
+                        View.INVISIBLE : View.VISIBLE);
             }
         });
 
