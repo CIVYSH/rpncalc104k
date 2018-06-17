@@ -33,4 +33,6 @@
     <string name="tangentOutOfDomain">Eso da infinito</string>
     <string name="logBaseIsOne">La base del logaritmo es 1</string>
     <string name="longOperation">La operación tomará demasiado tiempo</string>
+    <string name="errorContactDev">Error. Por favor, avise al desarrollador</string>
+    <string name="unknownError">Error desconocido</string>
 </resources>

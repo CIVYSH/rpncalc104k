@@ -14,7 +14,6 @@ class SwapChange implements Change {
         this.undoText = undoText;
     }
 
-
     @Override
     public void undo() {
         ActivityMain activity = saver.getActivity();
@@ -30,7 +29,6 @@ class SwapChange implements Change {
     public void redo() {
         ActivityMain activity = saver.getActivity();
 
-//            activity.clickedSwap(false, startPosition, endPosition);
         BigDecimal draggingNumber = activity.numberStackRemove(startPosition);
         activity.numberStackAdd(endPosition, draggingNumber);
         activity.resetEditableNumber();

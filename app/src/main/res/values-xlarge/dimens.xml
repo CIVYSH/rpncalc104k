@@ -10,7 +10,7 @@
     <dimen name="angle_text_size">22sp</dimen>
     
     <dimen name="layout_digits_height">96sp</dimen>
-    <dimen name="editable_text_size">80sp</dimen>
+    <dimen name="editable_text_size">77sp</dimen>
     
     <dimen name="error_text_size">32sp</dimen>
     

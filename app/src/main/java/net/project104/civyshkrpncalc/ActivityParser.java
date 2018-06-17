@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import net.project104.infixparser.Calculator;
 import net.project104.infixparser.RawText;
 
 public class ActivityParser extends Activity {
@@ -19,6 +20,7 @@ public class ActivityParser extends Activity {
     private ImageButton btDelete, btAccept;
     private TextView tvResult;
     private EditText etInput;
+    private Calculator calc;
 
     private View.OnClickListener deleteListener = new View.OnClickListener() {
         @Override
@@ -28,6 +30,10 @@ public class ActivityParser extends Activity {
             enableAccept(true);
         }
     };
+
+    public ActivityParser(){
+        calc = new Calculator();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +76,7 @@ public class ActivityParser extends Activity {
                     return;
                 }
 
-                RawText raw = new RawText(s.toString());
+                RawText raw = new RawText(s.toString(), calc);
                 try {
                     String result = raw.getValue().toString();
                     tvResult.setText(result);

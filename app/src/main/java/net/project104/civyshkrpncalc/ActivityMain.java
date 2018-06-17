@@ -21,7 +21,6 @@ package net.project104.civyshkrpncalc;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -68,30 +66,33 @@ import android.widget.TextView;
 import android.widget.ViewAnimator;
 
 import com.terlici.dragndroplist.DragNDropListView;
+import static net.project104.infixparser.Constants.*;
 
-import static android.view.View.GONE;
+import net.project104.infixparser.AngleMode;
+import net.project104.infixparser.Calculator;
+import net.project104.infixparser.CalculatorError;
+import net.project104.infixparser.OperandStack;
+import net.project104.infixparser.OperandsBundle;
+import net.project104.infixparser.Operator;
+import net.project104.infixparser.ThreadedOperation;
 
-public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollChangedListener {
+public class ActivityMain
+        extends Activity
+        implements ViewTreeObserver.OnScrollChangedListener,
+                    OperandStack
+{
     final static String TAG = ActivityMain.class.getSimpleName();
 
-    final static BigDecimal BIG_PI = new BigDecimal(Math.PI);
-    final static BigDecimal BIG_EULER = new BigDecimal(Math.E);
-    final static BigDecimal BIG_PHI = new BigDecimal("1.618033988749894");
-
-    final static int ARITY_ALL = -1;// takes all numbers in stack
-    final static int ARITY_ZERO_ONE = -2;// takes one number if it's being written by user
-    final static int ARITY_N = -3;// takes N+1 numbers, let N be the first number in the stack
-
-    final static String DEGREE_MODE_PARAM = "AngleMode";
-    final static String NUMBER_STACK_PARAM = "NumberStack";
-    final static String HISTORY_SAVER_PARAM = "HistorySaver";
-    final static String SWITCHER_INDEX_PARAM = "SwitcherIndex";
+    final static String     DEGREE_MODE_PARAM = "AngleMode";
+    final static String    NUMBER_STACK_PARAM = "NumberStack";
+    final static String   HISTORY_SAVER_PARAM = "HistorySaver";
+    final static String  SWITCHER_INDEX_PARAM = "SwitcherIndex";
     final static String EDITABLE_NUMBER_PARAM = "EditableNumber";
 
-    static final boolean MERGE_DECIMAL = true;
-    static final boolean MERGE_DIGITS = true;
-    static final boolean MERGE_MINUS = true;
-    static final boolean MERGE_E = true;
+    static final boolean     MERGE_DECIMAL    =    true;
+    static final boolean      MERGE_DIGITS   =   true;
+    static final boolean       MERGE_MINUS  =  true;
+    static final boolean         MERGE_E   = true;
 
 
     enum UpdateStackFlag {
@@ -128,7 +129,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             tvEditableNumber.setText(text.toString().replace('.', separator));
             tvEditableNumber.post(new HorizontalViewScroller(scrollEditableNumber));
             scrollEditableNumber.setVisibility(View.VISIBLE);
-            scrollError.setVisibility(GONE);
+            scrollError.setVisibility(View.GONE);
         }
 
         void reset() {
@@ -229,148 +230,6 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
-    private class OperationData {
-        int arity;
-        Integer[] btnIds;
-
-        OperationData(int arity, Integer... btnIds) {
-            this.arity = arity;
-            this.btnIds = btnIds;
-        }
-    }
-
-    private class ThreadedOperation implements Callable<OperationBundle>{
-        private final OperationBundle bundle;
-        private final Operation operation;
-        private final int arity;
-        private final int numberOfArguments;
-
-        ThreadedOperation(OperationBundle results, Operation operation, int arity, int numberOfArguments){
-            this.bundle = new OperationBundle(results.operands);
-            this.operation = operation;
-            this.arity = arity;
-            this.numberOfArguments = numberOfArguments;
-        }
-
-        Future<OperationBundle> start(){
-            return threadPool.submit(this);
-        }
-
-        @Override
-        public OperationBundle call() {
-            try {
-                if (arity == ARITY_ALL) {
-                    switch (operation) {
-                        case SUMMATION:         calc.summation(bundle);break;
-                        case MEAN:              calc.mean(bundle);break;
-                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
-                    }
-                } else if (arity == ARITY_ZERO_ONE) {
-                    switch (operation){
-                        case CONSTANTPI:        calc.pi(bundle); break;
-                        case CONSTANTPHI:       calc.phi(bundle); break;
-                        case CONSTANTEULER:     calc.euler(bundle); break;
-                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED; break;
-                    }
-                } else if (arity == ARITY_N) {
-                    try {
-                        long nLong = bundle.operands[0].longValueExact();
-                        if (nLong <= Integer.MAX_VALUE) {
-                            int userNumberOperands = (int) nLong;
-                            if (numberStack.size() < userNumberOperands) {
-                                bundle.error = CalculatorError.NOT_ENOUGH_ARGS;
-                            } else {
-                                //pop N more results.operands
-                                ArrayList<BigDecimal> fullOperands = new ArrayList<>(userNumberOperands + 1);
-                                fullOperands.add(bundle.operands[0]);
-                                if(!Thread.currentThread().isInterrupted()){
-                                    //TODO this doesn't really protects from a weird race condition where the task can
-                                    //be cancelled in this right moment (after if()) and it'll still pop
-                                    //numbers from the stack. The main thread is assuming that task.cancel()
-                                    //prevents the stack to be modified here, but here it's doing exactly that.
-                                    //
-                                    //The race condition can only happen if the code before this line is so slow
-                                    //that it can't complete before the task times out.
-                                    // That means one whole second when I wrote this comment.
-                                    fullOperands.addAll(Arrays.asList(popNumbers(userNumberOperands)));
-                                    bundle.operands = fullOperands.toArray(new BigDecimal[userNumberOperands + 1]);
-                                    switch (operation) {
-                                        case SUMMATION_N:   calc.summationN(bundle);break;
-                                        case MEAN_N:        calc.meanN(bundle);break;
-                                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
-                                    }
-                                }else{
-                                    //noop; The result won't be used, there's no need to set the error
-                                }
-                            }
-                        } else {
-                            bundle.error = CalculatorError.TOO_MANY_ARGS;
-                        }
-                    }catch(ArithmeticException e) {
-                        bundle.error = CalculatorError.LAST_NOT_INT;
-                    }
-                } else if (arity == 0) {
-                    switch (operation) {
-                        case RANDOM: calc.random(bundle);break;
-                        default: bundle.error = CalculatorError.NOT_IMPLEMENTED; break;
-                    }
-                } else if (arity == 1) {
-                    switch (operation) {
-                        case INVERSION:             calc.inversion(bundle); break;
-                        case SQUARE:                calc.square(bundle); break;
-                        case NEGATIVE:              calc.negative(bundle); break;
-                        case SQUAREROOT:            calc.squareRoot(bundle); break;
-                        case SINE:                  calc.sine(bundle); break;
-                        case COSINE:                calc.cosine(bundle); break;
-                        case TANGENT:               calc.tangent(bundle); break;
-                        case ARCSINE:               calc.arcsine(bundle); break;
-                        case ARCCOSINE:             calc.arccosine(bundle); break;
-                        case ARCTANGENT:            calc.arctangent(bundle); break;
-                        case SINE_H:                calc.sineH(bundle); break;
-                        case COSINE_H:              calc.cosineH(bundle); break;
-                        case TANGENT_H:             calc.tangentH(bundle); break;
-                        case LOG10:                 calc.log10(bundle); break;
-                        case LOGN:                  calc.logN(bundle); break;
-                        case EXPONENTIAL:           calc.exponential(bundle); break;
-                        case FACTORIAL:             calc.factorial(bundle); break;
-                        case DEGTORAD:              calc.deg2rad(bundle); break;
-                        case RADTODEG:              calc.rad2deg(bundle); break;
-                        case FLOOR:                 calc.floor(bundle); break;
-                        case ROUND:                 calc.round(bundle); break;
-                        case CEIL:                  calc.ceil(bundle); break;
-                        case CIRCLE_SURFACE:        calc.circleSurface(bundle); break;
-                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED; break;
-                    }
-                } else if (arity == 2) {
-                    switch (operation) {
-                        case ADDITION:              calc.addition(bundle);break;
-                        case MULTIPLICATION:        calc.multiplication(bundle);break;
-                        case EXPONENTIATION:        calc.exponentiation(bundle);break;
-                        case SUBTRACTION:           calc.subtraction(bundle);break;
-                        case DIVISION:              calc.joyDivision(bundle);break;
-                        case ROOTYX:                calc.rootYX(bundle);break;
-                        case LOGYX:                 calc.logYX(bundle);break;
-                        case HYPOTENUSE_PYTHAGORAS: calc.hypotenusePythagoras(bundle);break;
-                        case LEG_PYTHAGORAS:        calc.legPythagoras(bundle);break;
-                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
-                    }
-                } else if (arity == 3) {
-                    switch (operation) {
-                        case TRIANGLE_SURFACE:      calc.triangleSurface(bundle);break;
-                        case QUARATIC_EQUATION:     calc.quadraticEquation(bundle);break;
-                        default:    bundle.error = CalculatorError.NOT_IMPLEMENTED;break;
-                    }
-                } else {
-                    bundle.error = CalculatorError.NOT_IMPLEMENTED;
-                }
-            }catch(ArithmeticException e) {
-                bundle.error = CalculatorError.NOT_IMPLEMENTED;
-            }
-
-            return bundle;
-        }
-    }
-
     private abstract class MyOnClickListener implements OnClickListener {
         @Override
         final public void onClick(View v) {
@@ -398,9 +257,9 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     MyOnClickListener clickListenerOperations = new MyOnClickListener() {
         @Override
         public void myOnClick(View view) {
-            Operation operation = getOperationFromBtnId(view.getId());
-            if (operation != null) {
-                clickedOperation(operation);
+            Operator operator = getOperatorFromBtnId(view.getId());
+            if (operator != null) {
+                clickedOperation(operator);
             } else {
                 Log.d(TAG, "Some button is not linked to any Operation");
             }
@@ -410,10 +269,10 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
     private ValueAnimator errorBackgroundAnimator;
 
-    private LinkedList<BigDecimal> numberStack = new LinkedList<>();
-    private Calculator calc = new Calculator();
+    private LinkedList<BigDecimal> numberStack;
+    private Calculator calc;
 
-    private ViewedString editableNumber = new ViewedString();
+    private ViewedString editableNumber;
     private boolean deleteCharBeforeDecimalSeparator = false;
     private boolean deleteCharBeforeScientificNotation = false;
 
@@ -431,9 +290,15 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
     private StackAnimator stackAnimator;
 
-    private HashMap<Operation, OperationData> operationsData;
+    private HashMap<Operator, int[]> operatorButtonIds;
 
     MyThreadPoolExecutor threadPool;
+
+    public ActivityMain(){
+        numberStack = new LinkedList<>();
+         calc = new Calculator();
+         editableNumber = new ViewedString();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -446,7 +311,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
         scrollEditableNumber = (HorizontalScrollView) findViewById(R.id.scrollEditableNumber);
         scrollError = (HorizontalScrollView) findViewById(R.id.scrollError);
-        scrollError.setVisibility(GONE);
+        scrollError.setVisibility(View.GONE);
         layoutNumbersDraggable = (DragNDropListView) findViewById(R.id.listNumbersDraggable);
         tvAngleMode = (TextView) findViewById(R.id.tvAngleMode);
         tvEditableNumber = (TextView) findViewById(R.id.tvEditableNumber);
@@ -465,66 +330,65 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         calc.setAngleMode(AngleMode.DEGREE);
         showAngleMode();
 
-        operationsData = new HashMap<>(Operation.values().length);
-        operationsData.put(Operation.ADDITION, new OperationData(2, R.id.butAddition));
-        operationsData.put(Operation.SUBTRACTION, new OperationData(2, R.id.butSubtraction));
-        operationsData.put(Operation.MULTIPLICATION, new OperationData(2, R.id.butMultiplication));
-        operationsData.put(Operation.DIVISION, new OperationData(2, R.id.butDivision));
+        operatorButtonIds = new HashMap<>(Operator.values().length);
+        operatorButtonIds.put(Operator.ADDITION, new int[]{R.id.butAddition});
+        operatorButtonIds.put(Operator.SUBTRACTION, new int[]{R.id.butSubtraction});
+        operatorButtonIds.put(Operator.MULTIPLICATION, new int[]{R.id.butMultiplication});
+        operatorButtonIds.put(Operator.DIVISION, new int[]{R.id.butDivision});
 
-        operationsData.put(Operation.SQUARE, new OperationData(1, R.id.butSquare));
-        operationsData.put(Operation.SQUAREROOT, new OperationData(1, R.id.butSquareRoot));
-        operationsData.put(Operation.EXPONENTIATION, new OperationData(2, R.id.butExponentiation));
-        operationsData.put(Operation.ROOTYX, new OperationData(2, R.id.butRootYX));
-        operationsData.put(Operation.NEGATIVE, new OperationData(1, R.id.butNegative));
-        operationsData.put(Operation.INVERSION, new OperationData(1, R.id.butInversion));
+        operatorButtonIds.put(Operator.SQUARE, new int[]{R.id.butSquare});
+        operatorButtonIds.put(Operator.SQUAREROOT, new int[]{R.id.butSquareRoot});
+        operatorButtonIds.put(Operator.EXPONENTIATION, new int[]{R.id.butExponentiation});
+        operatorButtonIds.put(Operator.ROOTYX, new int[]{R.id.butRootYX});
+        operatorButtonIds.put(Operator.NEGATIVE, new int[]{R.id.butNegative});
+        operatorButtonIds.put(Operator.INVERSION, new int[]{R.id.butInversion});
 
-        operationsData.put(Operation.LOG10, new OperationData(1, R.id.butLog10));
-        operationsData.put(Operation.LOGYX, new OperationData(2, R.id.butLogYX));
-        operationsData.put(Operation.LOGN, new OperationData(1, R.id.butLn));
-        operationsData.put(Operation.EXPONENTIAL, new OperationData(1, R.id.butExponential));
-        operationsData.put(Operation.FACTORIAL, new OperationData(1, R.id.butFactorial));
+        operatorButtonIds.put(Operator.LOG10, new int[]{R.id.butLog10});
+        operatorButtonIds.put(Operator.LOGYX, new int[]{R.id.butLogYX});
+        operatorButtonIds.put(Operator.LOGN, new int[]{R.id.butLn});
+        operatorButtonIds.put(Operator.EXPONENTIAL, new int[]{R.id.butExponential});
+        operatorButtonIds.put(Operator.FACTORIAL, new int[]{R.id.butFactorial});
 
-        operationsData.put(Operation.SINE, new OperationData(1, R.id.butSine));
-        operationsData.put(Operation.COSINE, new OperationData(1, R.id.butCosine));
-        operationsData.put(Operation.TANGENT, new OperationData(1, R.id.butTangent));
-        operationsData.put(Operation.ARCSINE, new OperationData(1, R.id.butArcSine));
-        operationsData.put(Operation.ARCCOSINE, new OperationData(1, R.id.butArcCosine));
-        operationsData.put(Operation.ARCTANGENT, new OperationData(1, R.id.butArcTangent));
-        operationsData.put(Operation.SINE_H, new OperationData(1, R.id.butSineH));
-        operationsData.put(Operation.COSINE_H, new OperationData(1, R.id.butCosineH));
-        operationsData.put(Operation.TANGENT_H, new OperationData(1, R.id.butTangentH));
+        operatorButtonIds.put(Operator.SINE, new int[]{R.id.butSine});
+        operatorButtonIds.put(Operator.COSINE, new int[]{R.id.butCosine});
+        operatorButtonIds.put(Operator.TANGENT, new int[]{R.id.butTangent});
+        operatorButtonIds.put(Operator.ARCSINE, new int[]{R.id.butArcSine});
+        operatorButtonIds.put(Operator.ARCCOSINE, new int[]{R.id.butArcCosine});
+        operatorButtonIds.put(Operator.ARCTANGENT, new int[]{R.id.butArcTangent});
+        operatorButtonIds.put(Operator.SINE_H, new int[]{R.id.butSineH});
+        operatorButtonIds.put(Operator.COSINE_H, new int[]{R.id.butCosineH});
+        operatorButtonIds.put(Operator.TANGENT_H, new int[]{R.id.butTangentH});
 
-        operationsData.put(Operation.FLOOR, new OperationData(1, R.id.butFloor));
-        operationsData.put(Operation.ROUND, new OperationData(1, R.id.butRound));
-        operationsData.put(Operation.CEIL, new OperationData(1, R.id.butCeil));
+        operatorButtonIds.put(Operator.FLOOR, new int[]{R.id.butFloor});
+        operatorButtonIds.put(Operator.ROUND, new int[]{R.id.butRound});
+        operatorButtonIds.put(Operator.CEIL, new int[]{R.id.butCeil});
 
-        operationsData.put(Operation.DEGTORAD, new OperationData(1, R.id.butDegreeToRadian));
-        operationsData.put(Operation.RADTODEG, new OperationData(1, R.id.butRadianToDegree));
-        operationsData.put(Operation.RANDOM, new OperationData(0, R.id.butRandom));
+        operatorButtonIds.put(Operator.DEGTORAD, new int[]{R.id.butDegreeToRadian});
+        operatorButtonIds.put(Operator.RADTODEG, new int[]{R.id.butRadianToDegree});
+        operatorButtonIds.put(Operator.RANDOM, new int[]{R.id.butRandom});
 
-        operationsData.put(Operation.CONSTANTPI, new OperationData(ARITY_ZERO_ONE, R.id.butPi));
-        operationsData.put(Operation.CONSTANTEULER, new OperationData(ARITY_ZERO_ONE, R.id.butEuler));
-        operationsData.put(Operation.CONSTANTPHI, new OperationData(ARITY_ZERO_ONE, R.id.butPhi));
+        operatorButtonIds.put(Operator.CONSTANTPI, new int[]{R.id.butPi});
+        operatorButtonIds.put(Operator.CONSTANTEULER, new int[]{R.id.butEuler});
+        operatorButtonIds.put(Operator.CONSTANTPHI, new int[]{R.id.butPhi});
 
-        operationsData.put(Operation.SUMMATION, new OperationData(ARITY_ALL, R.id.butSummation));
-        operationsData.put(Operation.SUMMATION_N, new OperationData(ARITY_N, R.id.butSummationRange));
-        operationsData.put(Operation.MEAN, new OperationData(ARITY_ALL, R.id.butMean));
-        operationsData.put(Operation.MEAN_N, new OperationData(ARITY_N, R.id.butMeanRange));
+        operatorButtonIds.put(Operator.SUMMATION, new int[]{R.id.butSummation});
+        operatorButtonIds.put(Operator.SUMMATION_N, new int[]{R.id.butSummationRange});
+        operatorButtonIds.put(Operator.MEAN, new int[]{R.id.butMean});
+        operatorButtonIds.put(Operator.MEAN_N, new int[]{R.id.butMeanRange});
 
-        operationsData.put(Operation.CIRCLE_SURFACE, new OperationData(1, R.id.butCircleSurface));
-        operationsData.put(Operation.TRIANGLE_SURFACE, new OperationData(3, R.id.butTriangleSurface));
-        operationsData.put(Operation.HYPOTENUSE_PYTHAGORAS, new OperationData(2, R.id.butHypotenusePythagoras));
-        operationsData.put(Operation.LEG_PYTHAGORAS, new OperationData(2, R.id.butLegPythagoras));
-        operationsData.put(Operation.QUARATIC_EQUATION, new OperationData(3, R.id.butQuadraticEquation));
+        operatorButtonIds.put(Operator.CIRCLE_SURFACE, new int[]{R.id.butCircleSurface});
+        operatorButtonIds.put(Operator.TRIANGLE_SURFACE, new int[]{R.id.butTriangleSurface});
+        operatorButtonIds.put(Operator.HYPOTENUSE_PYTHAGORAS, new int[]{R.id.butHypotenusePythagoras});
+        operatorButtonIds.put(Operator.LEG_PYTHAGORAS, new int[]{R.id.butLegPythagoras});
+        operatorButtonIds.put(Operator.QUARATIC_EQUATION, new int[]{R.id.butQuadraticEquation});
 
-        if (operationsData.size() != Operation.values().length) {
-            throw new RuntimeException("There are operations not implemented");
+        if (operatorButtonIds.size() != Operator.values().length) {
+            Log.w(TAG, "There are operations not implemented");
         }
 
-        for (Operation operation : Operation.values()) {
-            for (int i = 0; i < operationsData.get(operation).btnIds.length; i++) {
-                int btnId = operationsData.get(operation).btnIds[i];
-                findViewById(btnId).setOnClickListener(clickListenerOperations);
+        for(int[] buttonIds : operatorButtonIds.values()){
+            for (int id : buttonIds) {
+                findViewById(id).setOnClickListener(clickListenerOperations);
             }
         }
 
@@ -845,6 +709,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
     }
 
+    @Override
     public BigDecimal[] popNumbers(int amount) {
         BigDecimal[] numbers = new BigDecimal[amount];
         for (int i = amount - 1; i >= 0; i--) {
@@ -852,6 +717,11 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         }
         numberStackDraggableAdapter.notifyDataSetChanged();
         return numbers;
+    }
+
+    @Override
+    public int size(){
+        return numberStack.size();
     }
 
     public int getNumberStackSize(){
@@ -1100,7 +970,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
     private void clickedDelete(boolean save) {
         if (scrollError.getVisibility() == View.VISIBLE) {
-            scrollError.setVisibility(GONE);
+            scrollError.setVisibility(View.GONE);
             scrollEditableNumber.setVisibility(View.VISIBLE);
             return;
         }
@@ -1161,7 +1031,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
 
     private void clickedPopNumber(boolean save) {
         if (scrollError.getVisibility() == View.VISIBLE) {
-            scrollError.setVisibility(GONE);
+            scrollError.setVisibility(View.GONE);
             scrollEditableNumber.setVisibility(View.VISIBLE);
             return;
         }
@@ -1232,33 +1102,37 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         numberStackDraggableAdapter.notifyDataSetChanged();
     }
 
-    private void clickedOperation(Operation operation) {
+    private void clickedOperation(Operator operator) {
         SimpleChange simpleChange = new SimpleChange(historySaver, editableNumber.toString());
 
-        final int arity = operationsData.get(operation).arity,
-                  availableArguments = numberStack.size();
+        final int availableArguments = numberStack.size();
         int numberOfArguments;
         boolean enoughArguments,
                 editableInStack = isEditableNumberInStack();
 
         editableNumber.reset();
 
-        if (arity == ARITY_ALL) {
-            numberOfArguments = availableArguments;
-            enoughArguments = availableArguments != 0;
-        } else if (arity == ARITY_ZERO_ONE) {
-            if (editableInStack) {
+        switch(operator.getArity()) {
+            case ARITY_ALL:
+                numberOfArguments = availableArguments;
+                enoughArguments = availableArguments != 0;
+                break;
+            case ARITY_ZERO_ONE:
+                if (editableInStack) {
+                    numberOfArguments = 1;
+                } else {
+                    numberOfArguments = 0;
+                }
+                enoughArguments = availableArguments >= numberOfArguments;
+                break;
+            case ARITY_N:
                 numberOfArguments = 1;
-            } else {
-                numberOfArguments = 0;
-            }
-            enoughArguments = availableArguments >= numberOfArguments;
-        } else if (arity == ARITY_N) {
-            numberOfArguments = 1;
-            enoughArguments = availableArguments >= numberOfArguments;
-        } else {
-            numberOfArguments = arity;
-            enoughArguments = availableArguments >= numberOfArguments;
+                enoughArguments = availableArguments >= numberOfArguments;
+                break;
+            default:
+                numberOfArguments = operator.getArity();
+                enoughArguments = availableArguments >= numberOfArguments;
+                break;
         }
 
         if (!enoughArguments) {
@@ -1275,30 +1149,35 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
             // 5.a Well, when the app goes to background, an alarm kills the app to free resources
             // TODO: Fix that race condition
 
-            OperationBundle operationBundle = new OperationBundle(operands);
-            ThreadedOperation operationTask = new ThreadedOperation(operationBundle, operation, arity, numberOfArguments);
-            Future<OperationBundle> futureResult = operationTask.start();
+            OperandsBundle bundle = new OperandsBundle(operands);
+            ThreadedOperation operationTask = new ThreadedOperation(bundle, operator, threadPool, calc, (OperandStack) this);
+            Future<OperandsBundle> futureResult = operationTask.start();
 
             String error = null;
             try {
-                operationBundle = futureResult.get(1, TimeUnit.SECONDS);
-                if(operationBundle.error != null) {
-                    error = getString(CalculatorError.getRStringId(operationBundle.error));
+                bundle = futureResult.get(1, TimeUnit.SECONDS);
+                if(bundle.getError() != null) {
+                    error = getString(getRStringId(bundle.getError()));
                 }
-            }catch(InterruptedException | ExecutionException | TimeoutException e) {
+            }catch(TimeoutException e) {
                 futureResult.cancel(true);
                 error = getString(R.string.longOperation);
                 Log.d(TAG, String.format("Operation too long. %d zombie threads will be killed when app goes to background", threadPool.getActiveCount()));
+            }catch(InterruptedException e){
+                error = getString(R.string.error);
+                Log.w(TAG, "Operation was interrupted");
+            }catch(ExecutionException e){
+                error = getString(R.string.errorContactDev);
+                Log.e(TAG, "Operation crashed. Please contact the dev");
             }
 
-            operands = operationBundle.operands;
-            List<BigDecimal> results = operationBundle.results;
+            List<BigDecimal> results = bundle.getResults();
 
             if (error != null) {
                 showError(error);
-                addNumbers(operands);
+                addNumbers(bundle.getOperands());
             } else {
-                for (BigDecimal operand : operands) {
+                for (BigDecimal operand : bundle.getOperands()) {
                     simpleChange.addOld(operand);
                 }
                 simpleChange.setRedoNumbersSize(results.size());
@@ -1355,10 +1234,12 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         numberStackDraggableAdapter.notifyDataSetChanged();
     }
 
-    private Operation getOperationFromBtnId(int id) {
-        for (Map.Entry<Operation, OperationData> dataEntry : operationsData.entrySet()) {
-            if (Arrays.asList(dataEntry.getValue().btnIds).contains(id)) {
-                return dataEntry.getKey();
+    private Operator getOperatorFromBtnId(int id) {
+        for (Map.Entry<Operator, int[]> entry : operatorButtonIds.entrySet()) {
+            for(int possibleId : entry.getValue()){
+                if(possibleId == id){
+                    return entry.getKey();
+                }
             }
         }
         return null;
@@ -1380,7 +1261,7 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
     private void showError(String str) {
         tvError.setText(getResources().getString(R.string.error) + ": " + str);
         scrollError.setVisibility(View.VISIBLE);
-        scrollEditableNumber.setVisibility(GONE);
+        scrollEditableNumber.setVisibility(View.GONE);
 
         if (Build.VERSION.SDK_INT >= 11) {
             errorBackgroundAnimator.start();
@@ -1476,7 +1357,31 @@ public class ActivityMain extends Activity implements ViewTreeObserver.OnScrollC
         return s.length() != 0 && s.charAt(s.length() - 1) == c;
     }
 
-
+    public static int getRStringId(CalculatorError error){
+        switch (error){
+            case NOT_IMPLEMENTED: return R.string.operationNotImplemented;
+            case DIV_BY_ZERO: return R.string.divisionByZero;
+            case TOO_BIG: return R.string.numberTooBig;
+            case NEGATIVE_SQRT: return R.string.negativeSquareRoot;
+            case TAN_OUT_DOMAIN: return R.string.tangentOutOfDomain;
+            case ARCSIN_OUT_RANGE: return R.string.arcsineOutOfRange;
+            case ARCCOS_OUT_RANGE: return R.string.arccosineOutOfRange;
+            case LOG_OUT_RANGE: return R.string.logOutOfRange;
+            case WRONG_FACTORIAL: return R.string.wrongFactorial;
+            case NEGATIVE_RADIUS: return R.string.negativeRadius;
+            case NEGATIVE_BASE_EXPONENTIATION: return R.string.negativeBaseExponentiation;
+            case ROOT_INDEX_ZERO: return R.string.rootIndexZero;
+            case NEGATIVE_RADICAND: return R.string.negativeRadicand;
+            case LOG_BASE_ONE: return R.string.logBaseIsOne;
+            case SIDE_NEGATIVE: return R.string.sideCantBeNegative;
+            case NOT_TRIANGLE: return R.string.notATriangle;
+            case COMPLEX_NUMBER: return R.string.complexNumber;
+            case TOO_MANY_ARGS: return R.string.tooManyArguments;
+            case NOT_ENOUGH_ARGS: return R.string.notEnoughArguments;
+            case LAST_NOT_INT: return R.string.nIsNotInteger;
+            default: return R.string.unknownError;
+        }
+    }
 
 }
 //TODO catch NumberFormatException in every addEditableToStack call

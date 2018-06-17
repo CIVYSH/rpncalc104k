@@ -8,7 +8,7 @@
     <dimen name="angle_view_width">22sp</dimen>
     <dimen name="angle_text_size">12sp</dimen>
 
-    <dimen name="editable_text_size">35sp</dimen>
+    <dimen name="editable_text_size">32sp</dimen>
 
     <dimen name="error_text_size">12sp</dimen>
 

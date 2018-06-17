@@ -6,6 +6,8 @@
     <string name="decimalSeparator">.</string>
     <string name="notEnoughArguments">Not enough operands</string>
     <string name="error">Error</string>
+    <string name="errorContactDev">Error. Please, contact the dev</string>
+    <string name="unknownError">Unknown error</string>
     <string name="divisionByZero">Division by zero</string>
     <string name="negativeSquareRoot">Negative square root</string>
     <string name="notATriangle">Not a triangle</string>

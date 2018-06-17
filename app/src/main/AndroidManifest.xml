@@ -41,7 +41,7 @@
 
         <activity
             android:name=".ActivityParser"
-            android:windowSoftInputMode="stateVisible" />
+            android:windowSoftInputMode="stateVisible"/>
     </application>
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
