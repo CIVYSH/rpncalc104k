@@ -11,7 +11,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/parser_margin_small"
+        android:layout_margin="@dimen/parser_margin_global"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
@@ -42,6 +42,7 @@
                 android:id="@+id/tvResult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/parser_margin_global"
                 android:gravity="center"
                 android:maxLines="6"
                 android:singleLine="false"
@@ -69,11 +70,11 @@
             <Button
                 android:id="@+id/butToogleInfo"
                 style="@style/buttonStyle.Control"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_weight="1"
+                android:layout_width="@dimen/parser_button_width"
+                android:layout_height="@dimen/parser_button_height"
+                android:layout_marginBottom="@dimen/parser_margin_small"
                 android:text="..."
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/butAccept"
@@ -96,7 +97,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="@dimen/parser_margin_global"
         android:gravity="center_horizontal"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"

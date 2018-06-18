@@ -1696,7 +1696,7 @@ net.project104.infixparser.Operator -> net.project104.a.k:
     net.project104.infixparser.Operator TRIANGLE_SURFACE -> N
     net.project104.infixparser.Operator HYPOTENUSE_PYTHAGORAS -> O
     net.project104.infixparser.Operator LEG_PYTHAGORAS -> P
-    net.project104.infixparser.Operator QUARATIC_EQUATION -> Q
+    net.project104.infixparser.Operator QUADRATIC_EQUATION -> Q
     java.util.ArrayList functionNames -> R
     java.lang.String fName -> S
     int precedence -> T

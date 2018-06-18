@@ -1,8 +1,20 @@
 <resources>
 
-    <!--
-         Customize dimensions originally defined in res/values/dimens.xml (such as
-         screen margins) for sw600dp devices (e.g. 7" tablets) here.
-    -->
+    <dimen name="number_index_text_size">18sp</dimen>
+    <dimen name="number_index_width">38sp</dimen>
+    <dimen name="list_numbers_text_size">23sp</dimen>
+    <dimen name="draggable_handler_size">24sp</dimen>
+
+    <dimen name="angle_view_width">26sp</dimen>
+    <dimen name="angle_text_size">18sp</dimen>
+    <dimen name="editable_text_size">40sp</dimen>
+    <dimen name="error_text_size">17sp</dimen>
+
+    <dimen name="button_operation_padding">0dp</dimen>
+
+    <dimen name="button_digit_text_size">36sp</dimen>
+    <dimen name="arrow_size">40dp</dimen>
+    <dimen name="arrow_margin_fix">20px</dimen>
+
 
 </resources>

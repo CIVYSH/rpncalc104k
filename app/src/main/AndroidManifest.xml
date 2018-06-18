@@ -21,6 +21,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="net.project104.civyshkrpncalc">
 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/app_icon_rpn"
@@ -35,15 +37,13 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".CleanerService"
-            android:exported="false"/>
-
         <activity
             android:name=".ActivityParser"
             android:windowSoftInputMode="stateVisible"/>
-    </application>
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
+        <service
+            android:name=".CleanerService"
+            android:exported="false"/>
+    </application>
 
 </manifest>

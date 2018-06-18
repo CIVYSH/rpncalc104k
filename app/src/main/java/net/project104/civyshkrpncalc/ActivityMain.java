@@ -380,7 +380,7 @@ public class ActivityMain
         operatorButtonIds.put(Operator.TRIANGLE_SURFACE, new int[]{R.id.butTriangleSurface});
         operatorButtonIds.put(Operator.HYPOTENUSE_PYTHAGORAS, new int[]{R.id.butHypotenusePythagoras});
         operatorButtonIds.put(Operator.LEG_PYTHAGORAS, new int[]{R.id.butLegPythagoras});
-        operatorButtonIds.put(Operator.QUARATIC_EQUATION, new int[]{R.id.butQuadraticEquation});
+        operatorButtonIds.put(Operator.QUADRATIC_EQUATION, new int[]{R.id.butQuadraticEquation});
 
         if (operatorButtonIds.size() != Operator.values().length) {
             Log.w(TAG, "There are operations not implemented");
@@ -1288,7 +1288,7 @@ public class ActivityMain
         final int stackSize = numberStack.size();
         final int lastVisibleNumber = layoutNumbersDraggable.getLastVisiblePosition();
         if (lastVisibleNumber == stackSize - 1) {
-            int marginFix = (int) getResources().getDimension(R.dimen.arrowMarginFix);
+            int marginFix = (int) getResources().getDimension(R.dimen.arrow_margin_fix);
             arrowDown.setVisibility(layoutNumbersDraggable.getChildAt(numberViews - 1).getBottom() > layoutNumbersDraggable.getHeight() + marginFix ? View.VISIBLE : View.INVISIBLE);
         } else {
             arrowDown.setVisibility(lastVisibleNumber < stackSize - 1 ? View.VISIBLE : View.INVISIBLE);

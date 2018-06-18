@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/activity_background_color"
+    tools:context=".ActivityParser">
+
+    <EditText
+        android:id="@+id/etInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginLeft="@dimen/parser_margin_global"
+        android:layout_marginRight="@dimen/parser_margin_global"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="@dimen/parser_margin_small"
+        android:ems="10"
+        android:gravity="center_horizontal"
+        android:inputType="textNoSuggestions"
+        android:textSize="@dimen/list_numbers_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/parser_margin_small"
+        android:maxLines="6"
+        android:singleLine="false"
+        android:textSize="@dimen/editable_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etInput" />
+
+    <TextView
+        android:id="@+id/tvInfoFunctions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginLeft="@dimen/parser_margin_global"
+        android:layout_marginRight="@dimen/parser_margin_global"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="@dimen/parser_margin_global"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layButtons" />
+
+    <LinearLayout
+        android:id="@+id/layButtons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginLeft="@dimen/parser_margin_global"
+        android:layout_marginRight="@dimen/parser_margin_global"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="@dimen/parser_margin_global"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvResult">
+
+        <ImageButton
+            android:id="@+id/butDelete"
+            style="@style/buttonStyle.Control.Pop"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/parser_button_height"
+            android:layout_weight="1"
+            android:src="@drawable/ic_cancel" />
+
+        <Button
+            android:id="@+id/butToogleInfo"
+            style="@style/buttonStyle.Control"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/parser_button_height"
+            android:layout_marginLeft="@dimen/parser_margin_global"
+            android:layout_marginRight="@dimen/parser_margin_global"
+            android:layout_weight="1"
+            android:text="..." />
+
+        <ImageButton
+            android:id="@+id/butAccept"
+            style="@style/buttonStyle.Control.Enter"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/parser_button_height"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:src="@drawable/ic_accept" />
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
