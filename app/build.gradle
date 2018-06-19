@@ -8,7 +8,7 @@ android {
         applicationId "net.project104.civyshkrpncalc"
         minSdkVersion 9
         targetSdkVersion 22
-        versionCode 16
+        versionCode 18
         versionName "3.1.2"
     }
 
@@ -27,8 +27,16 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            proguardFile '/home/bskr/datos/informatica/projectsAndroidStudio/RPNCalc104k/app/proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             proguardFile '/home/bskr/datos/informatica/projectsAndroidStudio/RPNCalc104k/app/proguard-rules.pro'
         }
     }
