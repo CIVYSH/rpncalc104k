@@ -6,3 +6,7 @@
 [Google Play](https://play.google.com/store/apps/details?id=net.project104.civyshkrpncalc)
 
 [Download for Android](https://raw.githubusercontent.com/civyshk/rpncalc104k/master/app/rpncalc104 (10 v2.1.2).apk)
+
+## Privacy
+
+This app does not access, read, analyze nor collect any personal or non personal information.
